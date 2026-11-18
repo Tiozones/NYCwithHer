@@ -162,7 +162,7 @@
 <body class="flex flex-col text-slate-800 select-none md:select-auto">
 
   <!-- Top Header -->
-  <header class="safe-header bg-slate-900 text-white pb-2.5 shadow-lg z-30 border-b border-amber-500/30 shrink-0">
+  <header class="safe-header bg-slate-900 text-white pb-2.5 shadow-lg z-40 border-b border-amber-500/30 shrink-0">
     <div class="flex items-center justify-between gap-2">
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center border border-amber-400/50 shrink-0 shadow-inner">
@@ -180,8 +180,8 @@
 
       <!-- Basemap Style Switcher -->
       <div class="flex items-center gap-1.5 shrink-0">
-        <button id="btn-basemap" onclick="cycleBasemap()" title="Alternar estilo do mapa" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-300 border border-slate-700 text-[11px] font-semibold transition flex items-center gap-1.5">
-          <i class="fa-solid fa-map"></i>
+        <button id="btn-basemap" onclick="cycleBasemap()" title="Alternar estilo do mapa" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-300 border border-amber-400/40 text-[11px] font-semibold transition flex items-center gap-1.5 shadow cursor-pointer">
+          <i class="fa-solid fa-layer-group"></i>
           <span id="basemap-label">CARTO Voyager</span>
         </button>
       </div>
@@ -189,16 +189,16 @@
 
     <!-- Action Bar -->
     <div class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar pb-0.5">
-      <button onclick="locateUser()" id="btn-gps" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap shadow">
+      <button onclick="locateUser()" id="btn-gps" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap shadow cursor-pointer">
         <i class="fa-solid fa-location-crosshairs"></i> Onde estou
       </button>
-      <button onclick="focusMidtown()" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap shadow">
+      <button onclick="focusMidtown()" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap shadow cursor-pointer">
         <i class="fa-solid fa-shoe-prints"></i> Midtown (A Pé)
       </button>
-      <button onclick="focusAllNYC()" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 active:scale-95 text-white text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap shadow">
+      <button onclick="focusAllNYC()" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 active:scale-95 text-white text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap shadow cursor-pointer">
         <i class="fa-solid fa-city"></i> Toda NY
       </button>
-      <button onclick="toggleTunnelModal()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap shadow">
+      <button onclick="toggleTunnelModal()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap shadow cursor-pointer">
         <i class="fa-solid fa-person-walking-arrow-right"></i> Túneis & Dicas
       </button>
     </div>
@@ -222,7 +222,7 @@
             <p id="active-route-stats" class="text-[11px] text-slate-200 truncate">Calculando traçado...</p>
           </div>
         </div>
-        <button onclick="clearActiveRoute()" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold shrink-0">
+        <button onclick="clearActiveRoute()" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold shrink-0 cursor-pointer">
           Limpar
         </button>
       </div>
@@ -264,10 +264,10 @@
       <!-- Primary Mode Switcher Tabs: Locais vs Rotas Prontas -->
       <div class="px-3 pt-1.5 md:pt-3 pb-2 bg-slate-50 border-b border-slate-200 shrink-0">
         <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-200/80 rounded-xl">
-          <button onclick="switchMainTab('places')" id="tab-places" class="py-1.5 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5">
+          <button onclick="switchMainTab('places')" id="tab-places" class="py-1.5 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-map-pin text-emerald-600"></i> Pontos (15)
           </button>
-          <button onclick="switchMainTab('routes')" id="tab-routes" class="py-1.5 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5">
+          <button onclick="switchMainTab('routes')" id="tab-routes" class="py-1.5 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-route text-amber-600"></i> Rotas Prontas (6)
           </button>
         </div>
@@ -299,19 +299,19 @@
 
       <!-- Category Filter Pills (Visible only on Places Tab) -->
       <div id="places-filter-bar" class="px-3 py-2 bg-white border-b border-slate-200 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-        <button onclick="filterCategory('all')" id="btn-cat-all" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-900 text-white whitespace-nowrap transition">
+        <button onclick="filterCategory('all')" id="btn-cat-all" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-900 text-white whitespace-nowrap transition cursor-pointer">
           Todos (15)
         </button>
-        <button onclick="filterCategory('base')" id="btn-cat-base" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition">
+        <button onclick="filterCategory('base')" id="btn-cat-base" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition cursor-pointer">
           🏨 Hotel & Reservas
         </button>
-        <button onclick="filterCategory('christmas')" id="btn-cat-christmas" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition">
+        <button onclick="filterCategory('christmas')" id="btn-cat-christmas" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition cursor-pointer">
           🎄 Luzes & Natal
         </button>
-        <button onclick="filterCategory('park')" id="btn-cat-park" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition">
+        <button onclick="filterCategory('park')" id="btn-cat-park" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition cursor-pointer">
           ⛸️ Patinação & Views
         </button>
-        <button onclick="filterCategory('downtown')" id="btn-cat-downtown" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition">
+        <button onclick="filterCategory('downtown')" id="btn-cat-downtown" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition cursor-pointer">
           🗽 Sul & Estátua
         </button>
       </div>
@@ -331,7 +331,7 @@
           <i class="fa-solid fa-subway text-amber-400 text-xl"></i>
           <h3 class="font-bold text-base sm:text-lg">Túneis Aquecidos & Dicas de Economia</h3>
         </div>
-        <button onclick="toggleTunnelModal()" class="text-slate-400 hover:text-white text-2xl leading-none px-2">&times;</button>
+        <button onclick="toggleTunnelModal()" class="text-slate-400 hover:text-white text-2xl leading-none px-2 cursor-pointer">&times;</button>
       </div>
       <div class="p-4 sm:p-5 space-y-3.5 text-sm text-slate-700 max-h-[75dvh] overflow-y-auto custom-scroll">
         <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-950">
@@ -371,7 +371,7 @@
         </div>
       </div>
       <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-        <button onclick="toggleTunnelModal()" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition">
+        <button onclick="toggleTunnelModal()" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition cursor-pointer">
           Fechar e voltar ao mapa
         </button>
       </div>
@@ -387,42 +387,66 @@
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Basemap Configurations
+    // Basemap Configurations (Synced API Key + Automatic TileError Fallback!)
     const CARTO_API_KEY = 'cb1_5b39_1_14c8344591d39fd65d62c4a6';
-    const basemaps = [
+
+    const cartoVoyagerLayer = L.tileLayer(
+      `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=${CARTO_API_KEY}`,
       {
-        name: ' Voyager',
-        layer: L.tileLayer(`https://{s}.basemaps.cdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=${CARTO_API_KEY}`, {
-          attribution: '&copy; OpenStreetMap &copy; CARTO',
-          subdomains: 'abcd',
-          maxZoom: 20
-        })
-      },
-      {
-        name: 'Limpo (Sem API)',
-        layer: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-          attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap',
-          maxZoom: 19
-        })
-      },
-      {
-        name: 'Ruas Detalhadas',
-        layer: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-          attribution: '&copy; Esri & OpenStreetMap',
-          maxZoom: 19
-        })
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
       }
+    );
+
+    const esriCleanLayer = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap',
+        maxZoom: 19
+      }
+    );
+
+    const esriStreetLayer = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution: '&copy; Esri & OpenStreetMap',
+        maxZoom: 19
+      }
+    );
+
+    const basemaps = [
+      { name: 'CARTO Voyager', layer: cartoVoyagerLayer },
+      { name: 'Limpo (Sem API)', layer: esriCleanLayer },
+      { name: 'Ruas Detalhadas', layer: esriStreetLayer }
     ];
 
     let currentBasemapIdx = 0;
-    basemaps[0].layer.addTo(map);
+    let autoFallbackTriggered = false;
 
-    function cycleBasemap() {
+    // Automatic fallback if CARTO tiles return 401/403 on a given domain
+    cartoVoyagerLayer.on('tileerror', function () {
+      if (!autoFallbackTriggered && currentBasemapIdx === 0) {
+        autoFallbackTriggered = true;
+        console.warn('CARTO tile blocked or key rejected for this origin; switching automatically to Esri Clean basemap.');
+        switchToBasemap(1);
+      }
+    });
+
+    function switchToBasemap(index) {
       map.removeLayer(basemaps[currentBasemapIdx].layer);
-      currentBasemapIdx = (currentBasemapIdx + 1) % basemaps.length;
+      currentBasemapIdx = index;
       basemaps[currentBasemapIdx].layer.addTo(map);
       document.getElementById('basemap-label').textContent = basemaps[currentBasemapIdx].name;
     }
+
+    function cycleBasemap() {
+      const nextIdx = (currentBasemapIdx + 1) % basemaps.length;
+      switchToBasemap(nextIdx);
+    }
+
+    // Start with CARTO Voyager (will auto-switch to Limpo if CARTO rejects the domain)
+    basemaps[0].layer.addTo(map);
 
     // Mobile Drawer 3-State Controller
     let drawerState = 'half';
@@ -449,7 +473,7 @@
       else setDrawerState('half');
     }
 
-    // Locations Data
+    // Locations Data (15 Points)
     const locations = [
       {
         id: 'hotel',
@@ -663,7 +687,7 @@
       }
     ];
 
-    // Ready-to-Use Step-by-Step Transit & Walking Routes (With OSRM Street Snapping Segments!)
+    // Ready-to-Use Step-by-Step Transit & Walking Routes (6 Routes with OSRM Street Snapping)
     const presetRoutes = [
       {
         id: 'route-ceia',
@@ -672,8 +696,6 @@
         color: '#059669',
         duration: '~15 min caminhada total',
         cost: 'Gratuito',
-        center: [40.7602, -73.9830],
-        zoom: 15,
         walkSegments: [
           [
             [40.7586, -73.9896], // ROW NYC Hotel
@@ -704,8 +726,6 @@
         color: '#059669',
         duration: '~2 a 8 min a pé',
         cost: '~$45–$60 prato p/ dividir',
-        center: [40.7585, -73.9850],
-        zoom: 16,
         walkSegments: [
           [
             [40.7600, -73.9800], // Radio City Music Hall
@@ -731,8 +751,6 @@
         color: '#0284c7',
         duration: '~25 min + parada na biblioteca',
         cost: '$16/pessoa (c/ cartão NYPL)',
-        center: [40.7605, -73.9810],
-        zoom: 14,
         walkSegments: [
           [
             [40.7586, -73.9896], // Hotel
@@ -770,8 +788,6 @@
         color: '#0284c7',
         duration: '~18 min metrô + 25 min barco',
         cost: '$2.90 metrô (Barco $0)',
-        center: [40.7150, -74.0150],
-        zoom: 12,
         walkSegments: [
           [
             [40.7586, -73.9896], // Hotel
@@ -808,8 +824,6 @@
         color: '#e11d48',
         duration: '~15 min metrô + 35 min passeio',
         cost: '$2.90 metrô (Ponte $0)',
-        center: [40.7250, -73.9980],
-        zoom: 13,
         walkSegments: [
           [
             [40.7155, -74.0092], // Chambers St Subway
@@ -842,8 +856,6 @@
         color: '#d97706',
         duration: '~10 min total',
         cost: '$2.90 metrô (ou $0 a pé)',
-        center: [40.7545, -73.9835],
-        zoom: 15,
         walkSegments: [
           [
             [40.7586, -73.9896], // Hotel
@@ -918,12 +930,12 @@
     ];
 
     async function initMidtownWalkLayer() {
-      const snappedCoords = await fetchOSRMFootGeometry(midtownWaypoints, 'osrm_midtown_loop_v3');
+      const snappedCoords = await fetchOSRMFootGeometry(midtownWaypoints, 'osrm_midtown_loop_v4');
       layers.walk.clearLayers();
       L.polyline(snappedCoords, {
         color: '#10b981',
         weight: 4,
-        opacity: 0.8,
+        opacity: 0.85,
         dashArray: '6, 8'
       }).bindTooltip('Circuito Caminhada Midtown (encaixado nas calçadas)', { sticky: true }).addTo(layers.walk);
     }
@@ -1135,7 +1147,7 @@
       if (r.walkSegments && r.walkSegments.length > 0) {
         for (let i = 0; i < r.walkSegments.length; i++) {
           const seg = r.walkSegments[i];
-          const snapped = await fetchOSRMFootGeometry(seg, `osrm_preset_${r.id}_walk_${i}_v3`);
+          const snapped = await fetchOSRMFootGeometry(seg, `osrm_preset_${r.id}_walk_${i}_v4`);
           L.polyline(snapped, {
             color: r.color,
             weight: 6,
@@ -1216,13 +1228,13 @@
       const filterBar = document.getElementById('places-filter-bar');
 
       if (tab === 'places') {
-        tabPlaces.className = 'py-1.5 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5';
-        tabRoutes.className = 'py-1.5 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5';
+        tabPlaces.className = 'py-1.5 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer';
+        tabRoutes.className = 'py-1.5 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5 cursor-pointer';
         filterBar.classList.remove('hidden');
         renderMarkersAndList('all');
       } else {
-        tabRoutes.className = 'py-1.5 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5';
-        tabPlaces.className = 'py-1.5 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5';
+        tabRoutes.className = 'py-1.5 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer';
+        tabPlaces.className = 'py-1.5 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5 cursor-pointer';
         filterBar.classList.add('hidden');
         renderPresetRoutesList();
       }
@@ -1270,7 +1282,7 @@
             ${stepsHTML}
           </div>
 
-          <button onclick="drawPresetRoute('${route.id}')" style="background-color: ${route.color};" class="w-full py-2.5 px-3 rounded-xl text-white text-xs font-bold shadow hover:opacity-95 active:scale-98 transition flex items-center justify-center gap-2">
+          <button onclick="drawPresetRoute('${route.id}')" style="background-color: ${route.color};" class="w-full py-2.5 px-3 rounded-xl text-white text-xs font-bold shadow hover:opacity-95 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer">
             <i class="fa-solid fa-map-location-dot"></i> Desenhar Esta Rota nas Ruas do Mapa
           </button>
         `;
@@ -1328,7 +1340,7 @@
                 <p class="text-[11px] leading-relaxed mt-0.5">${loc.tip}</p>
               </div>
               <div class="grid grid-cols-2 gap-1.5 pt-1">
-                <button onclick="routeFromCurrentLocation('${loc.id}')" class="py-2 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow">
+                <button onclick="routeFromCurrentLocation('${loc.id}')" class="py-2 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow cursor-pointer">
                   <i class="fa-solid fa-person-walking"></i> Rota a Pé Daqui
                 </button>
                 <a href="${appleMapsUrl}" target="_blank" rel="noopener" class="py-2 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow">
@@ -1372,7 +1384,7 @@
               <p class="text-xs text-slate-500 mt-0.5 truncate"><i class="fa-solid fa-shoe-prints mr-1 text-slate-400"></i>${loc.distance}</p>
               <p class="text-xs text-slate-600 mt-1.5 line-clamp-2 leading-relaxed">${loc.tip}</p>
               <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                <button onclick="event.stopPropagation(); routeFromCurrentLocation('${loc.id}')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] flex items-center gap-1 transition">
+                <button onclick="event.stopPropagation(); routeFromCurrentLocation('${loc.id}')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] flex items-center gap-1 transition cursor-pointer">
                   <i class="fa-solid fa-person-walking"></i> Rota a pé daqui (GPS)
                 </button>
                 <span class="text-[11px] font-semibold text-slate-400">Ver no mapa →</span>
