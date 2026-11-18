@@ -5,18 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Guia & Mapa Interativo de Natal em NY (24–29 Dez 2026)</title>
+  <meta name="theme-color" content="#0f172a">
+  <title>Natal em NY 2026 • Mapa & Rotas</title>
+  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
   <!-- Google Fonts: Inter & Playfair Display -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <style>
     :root {
       --sat: env(safe-area-inset-top, 0px);
@@ -25,31 +31,40 @@
       --sar: env(safe-area-inset-right, 0px);
     }
 
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
     html, body {
-      font-family: 'Inter', sans-serif;
       height: 100dvh;
       width: 100vw;
+      margin: 0;
+      padding: 0;
       overflow: hidden;
-      overscroll-behavior: none;
-      -webkit-tap-highlight-color: transparent;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #0f172a;
     }
 
     .font-serif-title {
       font-family: 'Playfair Display', serif;
     }
 
-    /* Safe Area Utilities for iPhone 16 / 16 Pro Max (Dynamic Island & Home Indicator) */
-    .safe-top {
-      padding-top: max(0.65rem, var(--sat));
+    .safe-header {
+      padding-top: max(10px, var(--sat));
+      padding-left: max(14px, var(--sal));
+      padding-right: max(14px, var(--sar));
     }
-    .safe-bottom {
-      padding-bottom: max(0.75rem, var(--sab));
+
+    .safe-bottom-area {
+      padding-bottom: max(12px, var(--sab));
     }
 
     #map {
       width: 100%;
       height: 100%;
       z-index: 10;
+      background: #e2e8f0;
     }
 
     /* Custom Marker Styling */
@@ -62,30 +77,30 @@
       font-weight: 700;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
       border: 2.5px solid #ffffff;
-      transition: transform 0.2s ease;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .custom-pin:hover, .custom-pin:active {
-      transform: scale(1.15);
+      transform: scale(1.18);
       z-index: 999 !important;
     }
 
-    /* GPS Pulse Marker */
-    .gps-dot {
+    /* User GPS Blue Dot Pulse */
+    .user-gps-dot {
       width: 18px;
       height: 18px;
-      background-color: #2563eb;
+      background: #2563eb;
       border: 3px solid #ffffff;
-      border-radius: 9999px;
-      box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.28);
+      border-radius: 50%;
+      box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.28), 0 2px 6px rgba(0,0,0,0.4);
       animation: gpsPulse 2s infinite;
     }
     @keyframes gpsPulse {
-      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5); }
+      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.55); }
       70% { box-shadow: 0 0 0 14px rgba(37, 99, 235, 0); }
       100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
     }
 
-    /* Responsive Leaflet Popup for iPhone & Desktop */
+    /* Custom Leaflet Popup */
     .leaflet-popup-content-wrapper {
       border-radius: 16px;
       padding: 0;
@@ -94,37 +109,27 @@
     }
     .leaflet-popup-content {
       margin: 0;
-      width: min(84vw, 310px) !important;
+      width: min(305px, 84vw) !important;
       font-family: 'Inter', sans-serif;
     }
     .leaflet-popup-close-button {
       color: #ffffff !important;
-      font-size: 24px !important;
-      width: 34px !important;
-      height: 34px !important;
-      line-height: 32px !important;
-      top: 6px !important;
-      right: 6px !important;
+      font-size: 22px !important;
+      top: 8px !important;
+      right: 10px !important;
+      width: 28px !important;
+      height: 28px !important;
       text-shadow: 0 1px 3px rgba(0,0,0,0.5);
     }
 
-    /* Bottom Sheet Smooth Transitions on Mobile */
-    @media (max-width: 767px) {
-      #sidebar-drawer {
-        transition: height 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-      }
-      #sidebar-drawer.sheet-min {
-        height: calc(122px + var(--sab));
-      }
-      #sidebar-drawer.sheet-mid {
-        height: 46dvh;
-      }
-      #sidebar-drawer.sheet-max {
-        height: 78dvh;
-      }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
 
-    /* Custom Scrollbar */
     .custom-scroll::-webkit-scrollbar {
       width: 5px;
       height: 5px;
@@ -136,230 +141,245 @@
       background: #cbd5e1;
       border-radius: 9999px;
     }
+
+    /* Mobile Bottom Sheet Transitions */
+    @media (max-width: 767px) {
+      #drawer-panel {
+        transition: height 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      #drawer-panel.sheet-collapsed {
+        height: 112px;
+      }
+      #drawer-panel.sheet-half {
+        height: 48dvh;
+      }
+      #drawer-panel.sheet-expanded {
+        height: 80dvh;
+      }
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 flex flex-col">
+<body class="flex flex-col text-slate-800 select-none md:select-auto">
 
-  <!-- Top Header (Safe-Area Aware for iPhone 16 Dynamic Island) -->
-  <header class="bg-slate-900 text-white px-3.5 pb-2.5 safe-top shadow-lg z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-500/30 shrink-0">
+  <!-- Top Header -->
+  <header class="safe-header bg-slate-900 text-white pb-2.5 shadow-lg z-30 border-b border-amber-500/30 shrink-0">
     <div class="flex items-center justify-between gap-2">
       <div class="flex items-center gap-2.5 min-w-0">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center border border-amber-400/50 shadow-inner shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center border border-amber-400/50 shrink-0 shadow-inner">
           <i class="fa-solid fa-tree text-amber-300 text-base"></i>
         </div>
         <div class="min-w-0">
-          <h1 class="font-serif-title text-base sm:text-xl tracking-wide text-amber-300 leading-tight truncate">
-            Natal em NY • 24–29 Dez 2026
+          <h1 class="font-serif-title text-base sm:text-xl tracking-wide text-amber-300 truncate leading-tight">
+            Natal em NY • 24–29 Dez
           </h1>
           <p class="text-[11px] sm:text-xs text-slate-300 truncate">
-            Base: <span class="font-semibold text-white">ROW NYC</span> • Ceia: <span class="font-semibold text-emerald-300">La Grande Boucherie</span>
+            Base: <span class="font-semibold text-white">ROW NYC</span> • Reservas: <span class="font-semibold text-emerald-300">Boucherie & Carmine's</span>
           </p>
         </div>
       </div>
 
-      <!-- Mobile-only Quick Help Button -->
-      <button onclick="toggleTunnelModal()" class="sm:hidden px-2.5 py-2 rounded-xl bg-amber-500 active:bg-amber-400 text-slate-950 text-xs font-bold transition flex items-center gap-1 shrink-0 shadow">
-        <i class="fa-solid fa-circle-info"></i> Dicas
-      </button>
+      <!-- Basemap Style Switcher -->
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button id="btn-basemap" onclick="cycleBasemap()" title="Alternar estilo do mapa" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-300 border border-slate-700 text-[11px] font-semibold transition flex items-center gap-1.5">
+          <i class="fa-solid fa-map"></i>
+          <span id="basemap-label">CARTO Voyager</span>
+        </button>
+      </div>
     </div>
 
-    <!-- Quick Zoom & Guide Buttons -->
-    <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-0.5 sm:pb-0">
-      <button onclick="focusMidtown()" class="px-3 py-2 sm:py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 active:bg-emerald-500 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow whitespace-nowrap">
+    <!-- Action Bar -->
+    <div class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar pb-0.5">
+      <button onclick="locateUser()" id="btn-gps" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap shadow">
+        <i class="fa-solid fa-location-crosshairs"></i> Onde estou
+      </button>
+      <button onclick="focusMidtown()" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap shadow">
         <i class="fa-solid fa-shoe-prints"></i> Midtown (A Pé)
       </button>
-      <button onclick="focusAllNYC()" class="px-3 py-2 sm:py-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow whitespace-nowrap">
-        <i class="fa-solid fa-city"></i> Manhattan Inteira
+      <button onclick="focusAllNYC()" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 active:scale-95 text-white text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap shadow">
+        <i class="fa-solid fa-city"></i> Toda NY
       </button>
-      <button onclick="toggleTunnelModal()" class="hidden sm:flex px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition items-center gap-1.5 shadow whitespace-nowrap">
-        <i class="fa-solid fa-person-walking-arrow-right"></i> Túneis vs. Superfície?
+      <button onclick="toggleTunnelModal()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap shadow">
+        <i class="fa-solid fa-person-walking-arrow-right"></i> Túneis & Dicas
       </button>
     </div>
   </header>
 
-  <!-- Main Workspace: Map + Retractable Mobile Bottom Sheet / Desktop Sidebar -->
-  <div class="flex-1 relative flex flex-col md:flex-row overflow-hidden">
+  <!-- Main Workspace -->
+  <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative bg-slate-200">
 
-    <!-- Map Container (Full background on mobile, right panel on desktop) -->
-    <main class="absolute inset-0 md:relative md:flex-1 h-full w-full">
+    <!-- Map Container -->
+    <main class="flex-1 h-full relative">
       <div id="map"></div>
 
-      <!-- Top-Left Floating Controls on Map: Basemap Switcher & GPS Location -->
-      <div class="absolute top-3 left-3 z-20 flex flex-col gap-2 max-w-[78vw]">
-        <!-- Basemap Style Switcher -->
-        <div class="bg-white/95 backdrop-blur-md p-1 rounded-xl shadow-md border border-slate-200 flex items-center gap-1 text-[11px] font-semibold">
-          <button id="btn-style-carto" onclick="setBasemap('carto')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white transition flex items-center gap-1">
-            <i class="fa-solid fa-map text-amber-400"></i> CARTO Voyager
-          </button>
-          <button id="btn-style-esri" onclick="setBasemap('esri')" class="px-2.5 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition flex items-center gap-1">
-            <i class="fa-solid fa-layer-group text-emerald-600"></i> Mapa Limpo (Sem API)
-          </button>
+      <!-- Active Route Banner (Floating Top on Map when a route is active) -->
+      <div id="active-route-banner" class="hidden absolute top-3 left-3 right-14 z-20 bg-slate-900/95 backdrop-blur-md text-white p-2.5 rounded-2xl shadow-xl border border-amber-400/50 flex items-center justify-between gap-2">
+        <div class="min-w-0 flex items-center gap-2">
+          <div id="banner-icon-box" class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+            <i id="banner-icon" class="fa-solid fa-route text-xs"></i>
+          </div>
+          <div class="min-w-0">
+            <p id="active-route-title" class="text-xs font-bold text-amber-300 truncate">Rota Ativa</p>
+            <p id="active-route-stats" class="text-[11px] text-slate-200 truncate">Calculando traçado...</p>
+          </div>
         </div>
-
-        <!-- GPS "Onde estou agora" Button -->
-        <button onclick="locateUser()" id="btn-gps" class="self-start px-3 py-2 rounded-xl bg-white/95 backdrop-blur-md hover:bg-blue-50 active:bg-blue-100 text-slate-800 border border-slate-200 shadow-md text-xs font-bold flex items-center gap-2 transition">
-          <i class="fa-solid fa-location-crosshairs text-blue-600 text-sm"></i>
-          <span>Onde estou agora</span>
+        <button onclick="clearActiveRoute()" class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold shrink-0">
+          Limpar
         </button>
-
-        <!-- Status Toast for GPS / Basemap -->
-        <div id="map-toast" class="hidden px-3 py-2 rounded-xl bg-slate-900/90 text-white text-xs shadow-lg backdrop-blur-md max-w-xs"></div>
       </div>
 
-      <!-- Floating Legend Card (Desktop Only) -->
-      <div class="hidden lg:block absolute bottom-5 right-4 z-20 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-lg border border-slate-200 max-w-xs text-xs">
+      <!-- Desktop Legend -->
+      <div class="hidden md:block absolute bottom-5 right-4 z-20 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-lg border border-slate-200 max-w-xs text-xs">
         <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-1.5">
-          <i class="fa-solid fa-compass text-amber-500"></i> Como se locomover em NY
+          <i class="fa-solid fa-compass text-amber-500"></i> Guia Rápido de Transporte
         </h4>
         <ul class="space-y-1.5 text-slate-600">
           <li class="flex items-start gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mt-1 shrink-0"></span>
-            <span><strong>Midtown (Por cima):</strong> Tudo entre Hotel, Ceia, Rockefeller e Grand Central fica a <strong>5–15 min a pé</strong>.</span>
+            <span><strong>Midtown (A Pé):</strong> Hotel, Ceia, Carmine's, Rockefeller e Bryant Park ficam a <strong>2–15 min</strong> pelas calçadas.</span>
           </li>
           <li class="flex items-start gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-amber-500 mt-1 shrink-0"></span>
-            <span><strong>Túneis Aquecidos:</strong> <em>Rockefeller Concourse</em> (47th–51st St) e <em>Grand Central / 42nd St</em>.</span>
+            <span><strong>Túneis Aquecidos:</strong> Use o <em>Rockefeller Concourse</em> (47th–51st St) e a <em>Grand Central / 42nd St</em> contra o vento.</span>
           </li>
           <li class="flex items-start gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-rose-600 mt-1 shrink-0"></span>
-            <span><strong>Sul (Ponte & Ferry):</strong> Metrô <strong>Linha 1 (Vermelha)</strong> direto até South Ferry (~18 min, $2.90).</span>
+            <span><strong>Metrô (OMNY $2.90):</strong> Encoste o iPhone/Apple Pay direto na catraca. Linha 1 vai direto ao Ferry da Estátua.</span>
           </li>
         </ul>
       </div>
     </main>
 
-    <!-- Left Sidebar (Desktop) / Retractable 3-State Bottom Sheet (Mobile iPhone 16) -->
-    <aside id="sidebar-drawer" class="sheet-mid fixed md:relative bottom-0 left-0 right-0 md:inset-auto w-full md:w-[400px] lg:w-[430px] md:h-full bg-white rounded-t-3xl md:rounded-none border-t md:border-t-0 md:border-r border-slate-200 flex flex-col z-30 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] md:shadow-xl order-first">
+    <!-- Sidebar (Desktop) / Collapsible Bottom Sheet (Mobile iPhone 16 / 16 Pro Max) -->
+    <aside id="drawer-panel" class="sheet-half fixed md:static bottom-0 left-0 right-0 md:w-[430px] lg:w-[460px] md:h-full bg-white rounded-t-3xl md:rounded-none border-t md:border-t-0 md:border-r border-slate-200 flex flex-col z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.2)] md:shadow-xl md:order-first">
       
-      <!-- Mobile Bottom-Sheet Drag Handle & State Switcher -->
-      <div class="md:hidden pt-2 pb-1.5 px-4 flex flex-col items-center border-b border-slate-100 shrink-0 select-none" onclick="cycleSheetState()">
-        <div class="w-11 h-1.5 rounded-full bg-slate-300 mb-1.5"></div>
-        <div class="w-full flex items-center justify-between text-[11px] text-slate-500 font-semibold">
-          <span id="sheet-state-label" class="flex items-center gap-1.5 text-slate-700">
-            <i class="fa-solid fa-up-down text-emerald-600"></i> Lista de Lugares & Rotas
-          </span>
-          <div class="flex items-center gap-1" onclick="event.stopPropagation()">
-            <button onclick="setSheetState('min')" id="btn-sheet-min" class="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Mapa Cheio</button>
-            <button onclick="setSheetState('mid')" id="btn-sheet-mid" class="px-2 py-1 rounded-lg bg-slate-900 text-white">Médio</button>
-            <button onclick="setSheetState('max')" id="btn-sheet-max" class="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Expandir</button>
-          </div>
+      <!-- Mobile Drawer Drag/Tap Handle -->
+      <div onclick="cycleDrawerHeight()" class="md:hidden pt-2 pb-1.5 px-4 flex flex-col items-center cursor-pointer shrink-0 bg-white rounded-t-3xl">
+        <div class="w-10 h-1.5 bg-slate-300 rounded-full mb-1"></div>
+        <div class="w-full flex items-center justify-between text-[11px] font-semibold text-slate-500">
+          <span id="drawer-state-label"><i class="fa-solid fa-chevron-up mr-1 text-emerald-600"></i>Toque para expandir ou recolher</span>
+          <span class="text-slate-400">iPhone Optimized</span>
         </div>
       </div>
 
-      <!-- Category Filter Pills (Always visible even when sheet is minimized on iPhone!) -->
-      <div class="px-3 py-2 bg-white border-b border-slate-200 flex gap-1.5 overflow-x-auto custom-scroll shrink-0">
-        <button onclick="filterCategory('all')" id="btn-cat-all" class="cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-900 text-white whitespace-nowrap transition">
-          Todos (14)
+      <!-- Primary Mode Switcher Tabs: Locais vs Rotas Prontas -->
+      <div class="px-3 pt-1.5 md:pt-3 pb-2 bg-slate-50 border-b border-slate-200 shrink-0">
+        <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-200/80 rounded-xl">
+          <button onclick="switchMainTab('places')" id="tab-places" class="py-1.5 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-map-pin text-emerald-600"></i> Pontos (15)
+          </button>
+          <button onclick="switchMainTab('routes')" id="tab-routes" class="py-1.5 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-route text-amber-600"></i> Rotas Prontas (6)
+          </button>
+        </div>
+
+        <!-- Layer Toggles (Compact) -->
+        <div class="grid grid-cols-4 gap-1 mt-2 text-[10px]">
+          <label class="flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg bg-white border border-slate-200 cursor-pointer">
+            <input type="checkbox" id="toggle-walk" checked onchange="toggleLayer('walk')" class="rounded text-emerald-600 w-3 h-3">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="font-semibold text-slate-700">A Pé</span>
+          </label>
+          <label class="flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg bg-white border border-slate-200 cursor-pointer">
+            <input type="checkbox" id="toggle-tunnels" checked onchange="toggleLayer('tunnels')" class="rounded text-amber-500 w-3 h-3">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span class="font-semibold text-slate-700">Túneis</span>
+          </label>
+          <label class="flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg bg-white border border-slate-200 cursor-pointer">
+            <input type="checkbox" id="toggle-subway" checked onchange="toggleLayer('subway')" class="rounded text-rose-600 w-3 h-3">
+            <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+            <span class="font-semibold text-slate-700">Metrô</span>
+          </label>
+          <label class="flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg bg-white border border-slate-200 cursor-pointer">
+            <input type="checkbox" id="toggle-ferry" checked onchange="toggleLayer('ferry')" class="rounded text-sky-500 w-3 h-3">
+            <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+            <span class="font-semibold text-slate-700">Ferry</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills (Visible only on Places Tab) -->
+      <div id="places-filter-bar" class="px-3 py-2 bg-white border-b border-slate-200 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+        <button onclick="filterCategory('all')" id="btn-cat-all" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-900 text-white whitespace-nowrap transition">
+          Todos (15)
         </button>
-        <button onclick="filterCategory('base')" id="btn-cat-base" class="cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">
-          🏨 Hotel & Ceia
+        <button onclick="filterCategory('base')" id="btn-cat-base" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition">
+          🏨 Hotel & Reservas
         </button>
-        <button onclick="filterCategory('christmas')" id="btn-cat-christmas" class="cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">
+        <button onclick="filterCategory('christmas')" id="btn-cat-christmas" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition">
           🎄 Luzes & Natal
         </button>
-        <button onclick="filterCategory('park')" id="btn-cat-park" class="cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">
-          ⛸️ Central Park & Views
+        <button onclick="filterCategory('park')" id="btn-cat-park" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition">
+          ⛸️ Patinação & Views
         </button>
-        <button onclick="filterCategory('downtown')" id="btn-cat-downtown" class="cat-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">
+        <button onclick="filterCategory('downtown')" id="btn-cat-downtown" class="cat-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 whitespace-nowrap transition">
           🗽 Sul & Estátua
         </button>
       </div>
 
-      <!-- Layer Toggles Panel -->
-      <div class="p-2.5 bg-slate-50 border-b border-slate-200 shrink-0">
-        <div class="grid grid-cols-2 gap-1.5 text-xs">
-          <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-emerald-400 transition">
-            <input type="checkbox" id="toggle-walk" checked onchange="toggleLayer('walk')" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
-            <span class="w-3 h-1 bg-emerald-500 inline-block rounded shrink-0"></span>
-            <span class="font-medium text-slate-700 truncate">A Pé (Midtown)</span>
-          </label>
-          <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-amber-400 transition">
-            <input type="checkbox" id="toggle-tunnels" checked onchange="toggleLayer('tunnels')" class="w-4 h-4 rounded text-amber-500 focus:ring-amber-500">
-            <span class="w-3 h-1 bg-amber-500 inline-block rounded shrink-0"></span>
-            <span class="font-medium text-slate-700 truncate">Túneis Internos</span>
-          </label>
-          <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-rose-400 transition">
-            <input type="checkbox" id="toggle-subway" checked onchange="toggleLayer('subway')" class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500">
-            <span class="w-3 h-1 bg-rose-600 inline-block rounded shrink-0"></span>
-            <span class="font-medium text-slate-700 truncate">Metrô (Downtown)</span>
-          </label>
-          <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-sky-400 transition">
-            <input type="checkbox" id="toggle-ferry" checked onchange="toggleLayer('ferry')" class="w-4 h-4 rounded text-sky-500 focus:ring-sky-500">
-            <span class="w-3 h-1 bg-sky-500 inline-block rounded shrink-0"></span>
-            <span class="font-medium text-slate-700 truncate">Ferry Estátua</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Scrollable Locations List -->
-      <div id="locations-list" class="flex-1 overflow-y-auto p-3 space-y-2.5 custom-scroll safe-bottom">
-        <!-- Populated dynamically by JS -->
+      <!-- Scrollable Content Container -->
+      <div id="locations-list" class="flex-1 overflow-y-auto p-3 space-y-2.5 custom-scroll safe-bottom-area">
+        <!-- Populated by JS -->
       </div>
     </aside>
-
   </div>
 
-  <!-- Underground Tunnels & Ferry Guide Modal -->
-  <div id="tunnel-modal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 hidden items-center justify-center p-3 sm:p-4">
+  <!-- Underground Tunnels & Hacks Modal -->
+  <div id="tunnel-modal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-200">
       <div class="bg-slate-900 text-white p-4 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <i class="fa-solid fa-subway text-amber-400 text-xl"></i>
-          <h3 class="font-bold text-sm sm:text-lg">Túneis Aquecidos & Dicas de Transporte em NY</h3>
+          <h3 class="font-bold text-base sm:text-lg">Túneis Aquecidos & Dicas de Economia</h3>
         </div>
-        <button onclick="toggleTunnelModal()" class="text-slate-300 hover:text-white text-2xl leading-none px-2 py-1">&times;</button>
+        <button onclick="toggleTunnelModal()" class="text-slate-400 hover:text-white text-2xl leading-none px-2">&times;</button>
       </div>
-      <div class="p-4 sm:p-5 space-y-3.5 text-sm text-slate-700 max-h-[72dvh] overflow-y-auto custom-scroll">
+      <div class="p-4 sm:p-5 space-y-3.5 text-sm text-slate-700 max-h-[75dvh] overflow-y-auto custom-scroll">
         <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-950">
-          <p class="font-semibold mb-1">NY tem túneis tipo o Pedway de Chicago?</p>
-          <p class="text-xs text-amber-900 leading-relaxed">
-            Não existe uma rede única ligando a cidade toda como em Chicago, <strong>mas há 2 complexos subterrâneos aquecidos excelentes em Midtown</strong> para vocês fugirem do vento entre um passeio e outro!
-          </p>
+          <p class="font-semibold mb-1">NY não liga a cidade toda por baixo como Chicago, MAS tem 2 passagens aquecidas ótimas em Midtown:</p>
+          <p class="text-xs text-amber-800">Use-as nos momentos de vento forte para ir ao banheiro, tomar café e cortar quarteirões no quentinho.</p>
         </div>
 
         <div class="border border-slate-200 rounded-xl p-3.5">
-          <h4 class="font-bold text-slate-900 flex items-center gap-2 text-xs sm:text-sm">
+          <h4 class="font-bold text-slate-900 flex items-center gap-2">
             <span class="px-2 py-0.5 rounded bg-amber-500 text-white text-xs">Túnel 1</span>
             Rockefeller Center Underground Concourse
           </h4>
-          <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
-            Liga por baixo da terra da <strong>47th St até a 51st St</strong> (entre a 5ª e a 7ª Avenida). Vocês caminham no quentinho por galerias com cafés, banheiros limpos e lojas entre o <strong>Radio City Music Hall</strong>, a estação <strong>47–50 Sts Rockefeller Ctr</strong> e os prédios do complexo.
+          <p class="text-xs text-slate-600 mt-1">
+            Liga por baixo da terra da <strong>47th St até a 51st St</strong> (entre a 5ª e a 7ª Av). Conecta o <strong>Radio City Music Hall</strong> à estação <strong>47–50 Sts Rockefeller Ctr</strong> e às lojas do complexo sem pegar vento.
           </p>
         </div>
 
         <div class="border border-slate-200 rounded-xl p-3.5">
-          <h4 class="font-bold text-slate-900 flex items-center gap-2 text-xs sm:text-sm">
+          <h4 class="font-bold text-slate-900 flex items-center gap-2">
             <span class="px-2 py-0.5 rounded bg-amber-500 text-white text-xs">Túnel 2</span>
-            Grand Central ↔ SUMMIT ↔ Bryant Park / Times Square
+            Grand Central ↔ SUMMIT ↔ Bryant Park / Times Sq
           </h4>
-          <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
-            O <strong>SUMMIT One Vanderbilt</strong> é conectado por dentro à <strong>Grand Central Terminal</strong>. De lá, passagens subterrâneas conectam até a estação <strong>42nd St – Bryant Park</strong> e <strong>Times Square</strong>.
+          <p class="text-xs text-slate-600 mt-1">
+            O <strong>SUMMIT One Vanderbilt</strong> é conectado por dentro à <strong>Grand Central Terminal</strong>, que por sua vez tem passagens subterrâneas até a estação <strong>42nd St – Bryant Park</strong> e <strong>Times Square</strong>.
           </p>
         </div>
 
         <div class="border border-emerald-200 bg-emerald-50/70 rounded-xl p-3.5">
-          <h4 class="font-bold text-emerald-950 flex items-center gap-2 text-xs sm:text-sm">
-            <i class="fa-solid fa-ferry text-sky-600"></i> Estátua da Liberdade de Graça (Staten Island Ferry)
+          <h4 class="font-bold text-emerald-950 flex items-center gap-2">
+            <i class="fa-solid fa-ticket text-emerald-600"></i> Checklist dos Seus Descontos
           </h4>
-          <p class="text-xs text-emerald-900 mt-1.5 leading-relaxed">
-            Pegue o metrô <strong>Linha 1 (Vermelha)</strong> direto até o fim (<em>South Ferry</em>) e embarque na <strong>Staten Island Ferry</strong> (100% gratuita, 24h, sai a cada 30 min).<br>
-            <strong>Segredo:</strong> Na ida, fique no convés externo do <strong>lado direito (starboard)</strong> para fotos perfeitas da Estátua! Chegando em Staten Island, basta desembarcar e pegar a balsa seguinte de volta.
-          </p>
+          <ul class="text-xs text-emerald-900 mt-1.5 space-y-1 list-disc pl-4">
+            <li><strong>Patinação Central Park ($16):</strong> Passe na Biblioteca (5th Ave com 40th/42nd St) com passaportes + reserva do hotel para tirar o cartão físico gratuito da NYPL e peça o ingresso <em>WRAP</em> na bilheteria do Wollman Rink (10h–11h30).</li>
+            <li><strong>Metrô ($2.90):</strong> Não compre MetroCard. Encoste o iPhone (Apple Pay Express Transit) ou cartão contactless direto na catraca (OMNY).</li>
+            <li><strong>Capital One ($89.10):</strong> Resgate em gift card do <strong>StubHub</strong> (Broadway) ou <strong>Uber</strong> (aeroporto).</li>
+          </ul>
         </div>
       </div>
-      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end safe-bottom">
-        <button onclick="toggleTunnelModal()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition">
-          Entendi, voltar ao mapa
+      <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button onclick="toggleTunnelModal()" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition">
+          Fechar e voltar ao mapa
         </button>
       </div>
     </div>
   </div>
 
   <script>
-    // User's CARTO API Key
-    const CARTO_API_KEY = 'cb1_5b39_1_14c8344591d39fd65d62c4a6';
-
-    // Initialize Map centered on Midtown Manhattan
+    // Initialize Map
     const map = L.map('map', {
       zoomControl: false,
       tap: true
@@ -367,132 +387,69 @@
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Tile Layers (CARTO Voyager with API Key + Clean Esri Light Gray Fallback without API Key)
-    const cartoVoyagerLayer = L.tileLayer(
-      `https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${CARTO_API_KEY}`,
+    // Basemap Configurations
+    const CARTO_API_KEY = 'cb1_5b39_1_14c8344591d39fd65d62c4a6';
+    const basemaps = [
       {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        subdomains: 'abcd',
-        maxZoom: 20
-      }
-    );
-
-    const esriCleanLayer = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+        name: 'CARTO Voyager',
+        layer: L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=${CARTO_API_KEY}`, {
+          attribution: '&copy; OpenStreetMap &copy; CARTO',
+          subdomains: 'abcd',
+          maxZoom: 20
+        })
+      },
       {
-        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
-        maxZoom: 16
-      }
-    );
-
-    const esriLabelsLayer = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+        name: 'Limpo (Sem API)',
+        layer: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+          attribution: '&copy; Esri, HERE, Garmin, OpenStreetMap',
+          maxZoom: 19
+        })
+      },
       {
-        maxZoom: 16
+        name: 'Ruas Detalhadas',
+        layer: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+          attribution: '&copy; Esri & OpenStreetMap',
+          maxZoom: 19
+        })
       }
-    );
+    ];
 
-    let currentBasemap = 'carto';
-    cartoVoyagerLayer.addTo(map);
+    let currentBasemapIdx = 0;
+    basemaps[0].layer.addTo(map);
 
-    // Detect if CARTO fails due to domain/referrer restrictions (e.g. local file:// or unapproved domain)
-    let tileErrorCount = 0;
-    cartoVoyagerLayer.on('tileerror', function() {
-      tileErrorCount++;
-      if (tileErrorCount === 3 && currentBasemap === 'carto') {
-        showToast('Aviso CARTO: se aparecer "API Key Required" neste domínio, toque em "Mapa Limpo (Sem API)" acima.', 6000);
-      }
-    });
+    function cycleBasemap() {
+      map.removeLayer(basemaps[currentBasemapIdx].layer);
+      currentBasemapIdx = (currentBasemapIdx + 1) % basemaps.length;
+      basemaps[currentBasemapIdx].layer.addTo(map);
+      document.getElementById('basemap-label').textContent = basemaps[currentBasemapIdx].name;
+    }
 
-    function setBasemap(style) {
-      const btnCarto = document.getElementById('btn-style-carto');
-      const btnEsri = document.getElementById('btn-style-esri');
+    // Mobile Drawer 3-State Controller
+    let drawerState = 'half';
+    function setDrawerState(state) {
+      const panel = document.getElementById('drawer-panel');
+      const label = document.getElementById('drawer-state-label');
+      panel.classList.remove('sheet-collapsed', 'sheet-half', 'sheet-expanded');
+      panel.classList.add(`sheet-${state}`);
+      drawerState = state;
 
-      if (style === 'carto') {
-        map.removeLayer(esriCleanLayer);
-        map.removeLayer(esriLabelsLayer);
-        cartoVoyagerLayer.addTo(map);
-        currentBasemap = 'carto';
-
-        btnCarto.className = 'px-2.5 py-1.5 rounded-lg bg-slate-900 text-white transition flex items-center gap-1';
-        btnEsri.className = 'px-2.5 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition flex items-center gap-1';
+      if (state === 'collapsed') {
+        label.innerHTML = '<i class="fa-solid fa-chevron-up mr-1 text-emerald-600"></i>Mostrar lista de pontos e rotas';
+      } else if (state === 'half') {
+        label.innerHTML = '<i class="fa-solid fa-up-down mr-1 text-emerald-600"></i>Expandir ou recolher mapa';
       } else {
-        map.removeLayer(cartoVoyagerLayer);
-        esriCleanLayer.addTo(map);
-        esriLabelsLayer.addTo(map);
-        currentBasemap = 'esri';
-
-        btnEsri.className = 'px-2.5 py-1.5 rounded-lg bg-slate-900 text-white transition flex items-center gap-1';
-        btnCarto.className = 'px-2.5 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition flex items-center gap-1';
-        showToast('Modo Mapa Limpo ativado (100% gratuito sem API).', 2500);
+        label.innerHTML = '<i class="fa-solid fa-chevron-down mr-1 text-amber-600"></i>Voltar para o mapa';
       }
+      setTimeout(() => map.invalidateSize(), 340);
     }
 
-    function showToast(msg, duration = 3500) {
-      const toast = document.getElementById('map-toast');
-      toast.textContent = msg;
-      toast.classList.remove('hidden');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => {
-        toast.classList.add('hidden');
-      }, duration);
+    function cycleDrawerHeight() {
+      if (drawerState === 'half') setDrawerState('expanded');
+      else if (drawerState === 'expanded') setDrawerState('collapsed');
+      else setDrawerState('half');
     }
 
-    // GPS User Location ("Onde estou agora")
-    let userLocationMarker = null;
-    let userAccuracyCircle = null;
-
-    function locateUser() {
-      if (!navigator.geolocation) {
-        showToast('Seu navegador não suporta geolocalização.');
-        return;
-      }
-
-      const btn = document.getElementById('btn-gps');
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-600"></i> <span>Buscando GPS...</span>';
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          const acc = pos.coords.accuracy;
-
-          if (userLocationMarker) map.removeLayer(userLocationMarker);
-          if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
-
-          const gpsIcon = L.divIcon({
-            className: '',
-            html: '<div class="gps-dot"></div>',
-            iconSize: [18, 18],
-            iconAnchor: [9, 9]
-          });
-
-          userLocationMarker = L.marker([lat, lng], { icon: gpsIcon })
-            .bindPopup('<div class="p-3 text-xs font-semibold text-slate-800"><i class="fa-solid fa-location-dot text-blue-600 mr-1"></i> Vocês estão aqui agora!</div>')
-            .addTo(map);
-
-          userAccuracyCircle = L.circle([lat, lng], {
-            radius: Math.min(acc, 120),
-            color: '#2563eb',
-            fillColor: '#3b82f6',
-            fillOpacity: 0.12,
-            weight: 1
-          }).addTo(map);
-
-          map.flyTo([lat, lng], 16, { duration: 1.1 });
-          userLocationMarker.openPopup();
-
-          btn.innerHTML = '<i class="fa-solid fa-location-crosshairs text-blue-600 text-sm"></i> <span>Onde estou agora</span>';
-        },
-        (err) => {
-          btn.innerHTML = '<i class="fa-solid fa-location-crosshairs text-blue-600 text-sm"></i> <span>Onde estou agora</span>';
-          showToast('Não foi possível acessar o GPS. Verifique as permissões de localização no iPhone/navegador.', 4500);
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    }
-
-    // All 14 Curated Locations
+    // Locations Data
     const locations = [
       {
         id: 'hotel',
@@ -502,25 +459,39 @@
         color: '#1e293b',
         icon: 'fa-bed',
         coords: [40.7586, -73.9896],
-        address: '700 8th Ave (entre 44th e 45th St)',
+        address: '700 8th Ave (44th–45th St)',
         distance: 'Ponto de partida',
         cost: 'Hospedagem',
-        transport: 'Coração de Midtown! Dá para fazer quase tudo em Midtown a pé.',
-        tip: 'Como o hotel passou por reformas para reabertura em 2026, vale reconfirmar sua reserva diretamente com eles semanas antes.'
+        transport: 'No coração de Midtown. Dá para fazer quase tudo em Midtown a pé.',
+        tip: 'Reconfirme sua reserva diretamente com o hotel semanas antes por conta da reabertura de 2026.'
       },
       {
         id: 'boucherie',
-        name: 'La Grande Boucherie (Ceia 24/12)',
+        name: 'La Grande Boucherie (Ceia 24/12 • 19h30)',
         category: 'base',
         badge: 'Ceia Confirmada!',
         color: '#059669',
         icon: 'fa-champagne-glasses',
         coords: [40.7626, -73.9808],
-        address: '145 W 53rd St (entre 6ª e 7ª Av)',
-        distance: '9 min a pé do hotel (por cima)',
-        cost: '$125/pessoa (Prix-Fixe 3 tempos)',
+        address: '145 W 53rd St (6ª–7ª Av)',
+        distance: '9 min a pé do hotel',
+        cost: '$125/pessoa (3 tempos)',
         transport: 'Caminhada plana pela 7ª Av ou Broadway até a 53rd St.',
-        tip: 'Salão estilo Belle Époque todo decorado para o Natal! Depois da ceia, caminhe apenas 6 min até a árvore do Rockefeller Center.'
+        tip: 'Salão Belle Époque todo decorado para o Natal! Depois da ceia, caminhe só 6 min até a árvore do Rockefeller.'
+      },
+      {
+        id: 'carmines',
+        name: "Carmine's - 44th Street (Sáb 26/12 • 22h00)",
+        category: 'base',
+        badge: 'Reserva Confirmada! 26/12',
+        color: '#059669',
+        icon: 'fa-utensils',
+        coords: [40.7575, -73.9866],
+        address: '200 W 44th St (entre 7ª e 8ª Av)',
+        distance: '2 min a pé do hotel (1 quarteirão!)',
+        cost: 'Family-Style (~$45–$60 prato p/ dividir)',
+        transport: 'Basta descer a 8th Ave até a W 44th St e virar à esquerda — fica no mesmo quarteirão do seu hotel.',
+        tip: 'Reserva confirmada para Sábado, 26/12 às 22h00 (2 pessoas)! Perfeito para pós-Broadway/Rockettes. Peça APENAS 1 prato principal para dividir entre vocês dois, pois as travessas servem 3 a 4 pessoas.'
       },
       {
         id: 'rockefeller',
@@ -531,56 +502,56 @@
         icon: 'fa-tree',
         coords: [40.7587, -73.9787],
         address: '30 Rockefeller Plaza (49th–50th St)',
-        distance: '10 min a pé do hotel / 6 min da Ceia',
-        cost: 'Gratuito (ver a árvore e praça)',
+        distance: '10 min do hotel / 6 min da Ceia',
+        cost: 'Gratuito',
         transport: 'Por cima ou pelo túnel subterrâneo Rockefeller Concourse (47th–51st St).',
-        tip: 'Fica iluminada até meia-noite (e 24h no dia de Natal!). Vá após a ceia do dia 24 quando as multidões diminuem.'
+        tip: 'Iluminada até meia-noite (e 24h no dia 25!). Vá logo após a ceia do dia 24.'
       },
       {
         id: 'saks',
-        name: 'Saks Fifth Avenue (Vitrines & Luzes)',
+        name: 'Saks Fifth Avenue (Show de Luzes)',
         category: 'christmas',
-        badge: 'Show de Luzes',
+        badge: 'Vitrines & Luzes',
         color: '#d97706',
         icon: 'fa-wand-magic-sparkles',
         coords: [40.7581, -73.9772],
-        address: '611 5th Ave (em frente ao Rockefeller)',
-        distance: '11 min a pé do hotel (1 min do Rockefeller)',
+        address: '611 5th Ave (frente ao Rockefeller)',
+        distance: '1 min da Árvore Rockefeller',
         cost: 'Gratuito',
-        transport: 'Bem em frente à árvore do Rockefeller Center, na 5ª Avenida.',
-        tip: 'As vitrines natalinas da Saks e o show de luzes projetado na fachada com música são um clássico gratuito de NY.'
+        transport: 'Basta atravessar a 5ª Avenida em frente ao Rockefeller Center.',
+        tip: 'As vitrines de Natal e o espetáculo de luzes na fachada com música são um clássico gratuito.'
       },
       {
         id: 'stpatricks',
         name: 'Catedral de St. Patrick',
         category: 'christmas',
-        badge: 'Tradição & Arquitetura',
+        badge: 'Tradição & Presépio',
         color: '#d97706',
         icon: 'fa-church',
         coords: [40.7585, -73.9760],
-        address: '5th Ave (entre 50th e 51st St)',
+        address: '5th Ave (50th–51st St)',
         distance: '12 min a pé do hotel',
-        cost: 'Entrada gratuita',
-        transport: 'Diagonal ao Rockefeller Center e ao lado da Saks Fifth Avenue.',
-        tip: 'Lindo entrar com sua mãe para ver o presépio gigante e a decoração natalina interna (e fugir do frio por 15 min!).'
+        cost: 'Gratuito',
+        transport: 'Ao lado da Saks Fifth Avenue e diagonal ao Rockefeller.',
+        tip: 'Entre com sua mãe para ver o presépio gigante e esquentar por 15 minutos.'
       },
       {
         id: 'radiocity',
-        name: 'Radio City Music Hall (Rockettes) & Broadway',
+        name: 'Radio City (Rockettes) & Broadway',
         category: 'christmas',
         badge: 'Espetáculos',
         color: '#9333ea',
         icon: 'fa-masks-theater',
         coords: [40.7600, -73.9800],
-        address: '1260 6th Ave (Radio City) / 45th St (Rei Leão)',
+        address: '1260 6th Ave / 45th St (Rei Leão)',
         distance: '3 a 9 min a pé do hotel',
-        cost: 'Loteria $35 / TKTS ou StubHub ($89 CapOne!)',
-        transport: 'Tudo colado no hotel. O Minskoff Theatre (Rei Leão) fica a 2 quarteirões do ROW NYC.',
-        tip: 'Use seus $89.10 do Capital One Shopping em gift card do StubHub ou tente a loteria digital do Rei Leão ($35) às 9h da manhã.'
+        cost: 'Loteria $35 ou StubHub ($89 CapOne)',
+        transport: 'O Minskoff Theatre (Rei Leão) fica a 2 quarteirões do ROW NYC.',
+        tip: 'Use seus $89.10 do Capital One em gift card do StubHub ou tente a loteria digital do Rei Leão ($35) às 9h.'
       },
       {
         id: 'bryantpark',
-        name: 'Bryant Park Winter Village & Biblioteca (NYPL)',
+        name: 'Bryant Park Winter Village & Biblioteca',
         category: 'christmas',
         badge: 'Feirinha & Cartão NYPL',
         color: '#d97706',
@@ -590,7 +561,7 @@
         distance: '9 min a pé do hotel',
         cost: 'Feira Grátis • Cartão NYPL Grátis',
         transport: 'Caminhada reta pela 42nd St ou conexão subterrânea com Grand Central.',
-        tip: 'PARADA ESTRATÉGICA: Passe na biblioteca (5th Ave com 40th/42nd St) com passaportes + reserva do hotel para tirar o cartão físico da NYPL e pagar só $16 na patinação do Central Park!'
+        tip: 'Passe na Biblioteca (5th Ave com 40th/42nd St) com passaportes + hotel para emitir o cartão físico NYPL e patinar por $16!'
       },
       {
         id: 'wollman',
@@ -601,52 +572,52 @@
         icon: 'fa-person-skating',
         coords: [40.7678, -73.9744],
         address: 'Sul do Central Park (59th St & 6th Ave)',
-        distance: '18 min a pé do hotel (ou Metrô N/R/W até 5 Av/59 St)',
-        cost: '$16 c/ cartão físico NYPL (WRAP) ou ~$52 normal',
-        transport: 'Vá de manhã (10h–11h30) na bilheteria física com os 2 cartões da biblioteca para garantir a cota WRAP.',
-        tip: 'Inclui entrada + aluguel de patins + chocolate quente por $16 com o cartão da biblioteca! A vista dos prédios ao fundo é de filme.'
+        distance: '18 min a pé (ou Metrô N/R/W até 5 Av/59 St)',
+        cost: '$16 c/ cartão NYPL (WRAP) ou ~$52 normal',
+        transport: 'Vá entre 10h e 11h30 direto na bilheteria física com os 2 cartões da NYPL.',
+        tip: 'Inclui entrada + patins + chocolate quente por $16 com o cartão da biblioteca! Vista icônica dos arranha-céus.'
       },
       {
         id: 'centralpark',
-        name: 'Caminhada Central Park (Gapstow Bridge & The Mall)',
+        name: 'Caminhada Central Park (Gapstow Bridge)',
         category: 'park',
         badge: 'Passeio Clássico',
         color: '#0284c7',
         icon: 'fa-camera',
         coords: [40.7690, -73.9735],
-        address: 'Sul do Central Park (logo acima do Wollman Rink)',
-        distance: 'Logo ao lado do rinque de patinação',
+        address: 'Sul do Central Park (acima do Wollman Rink)',
+        distance: '2 min a pé do rinque',
         cost: 'Gratuito',
-        transport: 'A pé saindo da patinação, subindo pela ponte de pedra (Gapstow Bridge) até a alameda The Mall.',
-        tip: 'A Gapstow Bridge é o cenário clássico de "Esqueceram de Mim 2" com o Hotel Plaza ao fundo.'
+        transport: 'Saindo da patinação, suba pela ponte de pedra (Gapstow Bridge) até a alameda The Mall.',
+        tip: 'Cenário clássico de "Esqueceram de Mim 2" com o Hotel Plaza ao fundo.'
       },
       {
         id: 'summit',
         name: 'SUMMIT One Vanderbilt & Grand Central',
         category: 'park',
-        badge: 'Melhor Vista & Túnel',
+        badge: 'Vista & Túnel Interno',
         color: '#0284c7',
         icon: 'fa-building',
         coords: [40.7527, -73.9787],
-        address: '45 E 42nd St (colado na Grand Central Terminal)',
-        distance: '14 min a pé do hotel (ou 1 parada metrô Shuttle S)',
+        address: '45 E 42nd St (colado na Grand Central)',
+        distance: '14 min a pé (ou Metrô Shuttle S - 2 min)',
         cost: 'Grand Central Grátis • SUMMIT ~$46–$55',
-        transport: 'Conectados por dentro! Visite a Grand Central (teto estrelado + mercado de Natal) e entre direto no SUMMIT sem sair no frio.',
-        tip: 'Compre o SUMMIT para o fim da tarde (~15h30) para ver NY de dia, o pôr do sol e as luzes da cidade acendendo.'
+        transport: 'Conectados por dentro! Visite a Grand Central e entre direto no SUMMIT sem sair no frio.',
+        tip: 'Agende o SUMMIT por volta das 15h30 para ver NY de dia, pôr do sol e à noite.'
       },
       {
         id: 'brooklynbridge',
-        name: 'Ponte do Brooklyn & DUMBO (Vista Manhattan)',
+        name: 'Ponte do Brooklyn & DUMBO',
         category: 'downtown',
         badge: 'Sul de Manhattan',
         color: '#e11d48',
         icon: 'fa-bridge',
         coords: [40.7124, -74.0041],
-        address: 'Entrada Pedestres: Centre St / Chambers St',
+        address: 'Centre St / Chambers St',
         distance: '15 min de metrô do hotel',
         cost: 'Gratuito',
-        transport: 'Metrô Linha 2 ou 3 (Vermelha) na Times Sq-42 St até Chambers St, ou A/C (Azul) até Brooklyn Bridge-City Hall.',
-        tip: 'Atravesse a ponte no sentido Manhattan → Brooklyn para caminhar no seu ritmo e chegar direto no DUMBO e no Brooklyn Bridge Park.'
+        transport: 'Metrô Linha 2 ou 3 (Vermelha) na Times Sq-42 St até Chambers St, ou A/C até Brooklyn Bridge-City Hall.',
+        tip: 'Atravesse no sentido Manhattan → Brooklyn para caminhar de frente para o visual e descer direto no DUMBO.'
       },
       {
         id: 'dumbo',
@@ -656,11 +627,11 @@
         color: '#e11d48',
         icon: 'fa-panorama',
         coords: [40.7033, -73.9949],
-        address: 'Washington St & Water St / Pebble Beach',
-        distance: 'Ao final da travessia da Ponte do Brooklyn',
+        address: 'Washington St & Water St',
+        distance: 'Final da Ponte do Brooklyn',
         cost: 'Gratuito',
-        transport: 'A pé descendo a ponte, ou metrô Linha F até York St / Linha A/C até High St.',
-        tip: 'Passe na Washington St para a foto clássica com a Manhattan Bridge enquadrada entre os prédios de tijolos.'
+        transport: 'A pé descendo a ponte ou metrô Linha F até York St.',
+        tip: 'Foto clássica na Washington St com a Manhattan Bridge enquadrada entre os prédios.'
       },
       {
         id: 'ferry',
@@ -673,8 +644,8 @@
         address: '4 South St (extremo sul de Manhattan)',
         distance: '18 min de metrô direto do hotel',
         cost: '100% GRATUITO (24h/dia)',
-        transport: 'Metrô Linha 1 (Vermelha) direto da Times Sq-42 St até a estação final South Ferry (sai dentro do terminal!).',
-        tip: 'Barco fechado e aquecido com área externa! Fique no LADO DIREITO na ida para ver a Estátua da Liberdade de pertinho sem gastar $1.'
+        transport: 'Metrô Linha 1 (Vermelha) direto da Times Sq-42 St até South Ferry (sai dentro do terminal!).',
+        tip: 'Barco fechado e aquecido! Fique no LADO DIREITO na ida para ver a Estátua da Liberdade de pertinho de graça.'
       },
       {
         id: 'statue',
@@ -685,15 +656,219 @@
         icon: 'fa-monument',
         coords: [40.6892, -74.0445],
         address: 'Liberty Island, NY Harbor',
-        distance: '25 min de travessia de balsa gratuita',
+        distance: '25 min de travessia gratuita',
         cost: 'Grátis pelo Staten Island Ferry',
-        transport: 'A linha azul tracejada no mapa mostra exatamente onde o barco passa em frente à Estátua!',
-        tip: 'Se quiser descer na ilha mesmo, compre apenas no site oficial (statuecitycruises.com), mas o ferry gratuito já rende fotos espetaculares.'
+        transport: 'A linha azul tracejada mostra onde o barco passa em frente à Estátua.',
+        tip: 'Chegando em Staten Island, desembarque e entre na fila do próximo barco de volta (saem a cada 30 min).'
+      }
+    ];
+
+    // Ready-to-Use Step-by-Step Transit & Walking Routes (With OSRM Street Snapping Segments!)
+    const presetRoutes = [
+      {
+        id: 'route-ceia',
+        title: 'Rota 1: Hotel → Ceia (24/12) → Árvore Rockefeller',
+        badge: 'Noite de Natal • A Pé + Túnel',
+        color: '#059669',
+        duration: '~15 min caminhada total',
+        cost: 'Gratuito',
+        center: [40.7602, -73.9830],
+        zoom: 15,
+        walkSegments: [
+          [
+            [40.7586, -73.9896], // ROW NYC Hotel
+            [40.7626, -73.9808], // La Grande Boucherie
+            [40.7587, -73.9787], // Rockefeller Tree
+            [40.7581, -73.9772], // Saks Fifth Ave
+            [40.7585, -73.9760]  // St Patrick's
+          ]
+        ],
+        fallbackCoords: [
+          [40.7586, -73.9896],
+          [40.7626, -73.9808],
+          [40.7587, -73.9787],
+          [40.7581, -73.9772],
+          [40.7585, -73.9760]
+        ],
+        steps: [
+          { icon: 'fa-shoe-prints', title: '1. Saída do ROW NYC Hotel (19h10)', desc: 'Saia pela 8th Ave, vire à direita na W 45th St até a 7th Ave, suba até a W 53rd St e entre à direita até o La Grande Boucherie (145 W 53rd St). ~9 min planos.' },
+          { icon: 'fa-champagne-glasses', title: '2. Ceia de Natal (19h30)', desc: 'Aproveite o menu de 3 tempos sem pressa.' },
+          { icon: 'fa-tree', title: '3. Pós-Ceia até a Árvore (~6 min)', desc: 'Saia do restaurante para a 6th Ave (Ave of the Americas), desça 3 quarteirões até a 50th St e entre no Rockefeller Plaza. Se estiver ventando muito, entre no túnel Rockefeller Concourse na 50th St.' },
+          { icon: 'fa-wand-magic-sparkles', title: '4. Saks Fifth Ave & St. Patrick', desc: 'Atravesse a 5ª Avenida para ver o show de luzes na fachada da Saks e a Catedral de St. Patrick logo ao lado.' }
+        ]
+      },
+      {
+        id: 'route-carmines',
+        title: "Rota 2: Sábado (26/12) • Hotel / Show → Carmine's (22h)",
+        badge: 'Reserva Confirmada • 2 min a Pé',
+        color: '#059669',
+        duration: '~2 a 8 min a pé',
+        cost: '~$45–$60 prato p/ dividir',
+        center: [40.7585, -73.9850],
+        zoom: 16,
+        walkSegments: [
+          [
+            [40.7600, -73.9800], // Radio City Music Hall
+            [40.7586, -73.9896], // ROW NYC Hotel
+            [40.7575, -73.9866]  // Carmine's 44th St
+          ]
+        ],
+        fallbackCoords: [
+          [40.7600, -73.9800],
+          [40.7586, -73.9896],
+          [40.7575, -73.9866]
+        ],
+        steps: [
+          { icon: 'fa-bed', title: '1. Saindo do ROW NYC Hotel (21h50)', desc: 'Saia do hotel na 8th Ave (altura da 44th/45th St), vire na esquina da W 44th St sentido Times Square (leste). O Carmine’s (200 W 44th St) fica na mesma quadra, a 2 minutos!' },
+          { icon: 'fa-masks-theater', title: '2. Ou vindo do Radio City / Broadway (~8 min)', desc: 'Saindo das Rockettes ou de algum musical na Times Square, basta seguir pela Broadway ou 7th Ave até a W 44th St.' },
+          { icon: 'fa-utensils', title: "3. Jantar no Carmine's (22h00)", desc: 'As porções são estilo família (servem 3–4 pessoas). Peçam 1 prato principal para dividir (ex: Penne alla Vodka, Lasagna ou Chicken Parmigiana) + 1 sobremesa se sobrar espaço.' }
+        ]
+      },
+      {
+        id: 'route-skate',
+        title: 'Rota 3: Hotel → Biblioteca (Cartão $16) → Patinação CP',
+        badge: 'Hack Economia • Manhã (9h30)',
+        color: '#0284c7',
+        duration: '~25 min + parada na biblioteca',
+        cost: '$16/pessoa (c/ cartão NYPL)',
+        center: [40.7605, -73.9810],
+        zoom: 14,
+        walkSegments: [
+          [
+            [40.7586, -73.9896], // Hotel
+            [40.7536, -73.9832], // Bryant Park
+            [40.7532, -73.9822]  // NYPL Main / Stavros
+          ],
+          [
+            [40.7646, -73.9734], // 5 Av / 59 St Subway Exit
+            [40.7678, -73.9744], // Wollman Rink
+            [40.7690, -73.9735]  // Gapstow Bridge
+          ]
+        ],
+        transitSegments: [
+          [
+            [40.7542, -73.9845], // 42 St Bryant Park Subway
+            [40.7646, -73.9734]  // 5 Av / 59 St Subway
+          ]
+        ],
+        fallbackCoords: [
+          [40.7586, -73.9896],
+          [40.7532, -73.9822],
+          [40.7646, -73.9734],
+          [40.7678, -73.9744]
+        ],
+        steps: [
+          { icon: 'fa-book', title: '1. Parada na Biblioteca (10h00)', desc: 'Caminhe 9 min pela 42nd St até a 5th Ave (Stavros Niarchos Library, 455 5th Ave). Apresente os 2 passaportes + reserva do hotel no balcão para tirar os cartões físicos gratuitos da NYPL.' },
+          { icon: 'fa-train-subway', title: '2. Metrô até 59th St (5 min)', desc: 'Pegue o metrô Linha N, R ou W (Amarela) na 42 St-Times Sq (sentido Uptown/Queens) e desça em 2 paradas na "5 Av / 59 St" (saída já na porta do Central Park!).' },
+          { icon: 'fa-person-skating', title: '3. Bilheteria Wollman Rink (10h30–11h30)', desc: 'Entre no parque pela 59th St & 6th Ave, vá direto na bilheteria física (não compre online), mostre os 2 cartões da NYPL e peça o ingresso WRAP ($16 cada = patins + entrada + chocolate quente).' }
+        ]
+      },
+      {
+        id: 'route-statue',
+        title: 'Rota 4: Hotel → Estátua da Liberdade (Ferry Grátis)',
+        badge: 'Metrô Direto + Balsa Gratuita',
+        color: '#0284c7',
+        duration: '~18 min metrô + 25 min barco',
+        cost: '$2.90 metrô (Barco $0)',
+        center: [40.7150, -74.0150],
+        zoom: 12,
+        walkSegments: [
+          [
+            [40.7586, -73.9896], // Hotel
+            [40.7573, -73.9897]  // 42 St Times Sq Subway entrance
+          ]
+        ],
+        transitSegments: [
+          [
+            [40.7573, -73.9897], // Times Sq 42 St
+            [40.7505, -73.9910], // Penn Station
+            [40.7359, -74.0003], // 14 St
+            [40.7155, -74.0092], // Chambers St
+            [40.7013, -74.0131], // South Ferry
+            [40.6920, -74.0310], // Statue pass
+            [40.6437, -74.0736]  // Staten Island
+          ]
+        ],
+        fallbackCoords: [
+          [40.7586, -73.9896],
+          [40.7013, -74.0131],
+          [40.6920, -74.0310],
+          [40.6437, -74.0736]
+        ],
+        steps: [
+          { icon: 'fa-train-subway', title: '1. Embarque na Linha 1 (Vermelha)', desc: 'Caminhe 2 min até a estação Times Sq–42 St (esquina da 42nd St com 7th/8th Ave). Entre na plataforma da Linha 1 sentido DOWNTOWN / SOUTH FERRY (trens a cada 4–8 min).' },
+          { icon: 'fa-door-open', title: '2. Desembarque em South Ferry (~18 min)', desc: 'Fique até a última estação (South Ferry). A escada rolante da estação já sai dentro do Whitehall Ferry Terminal.' },
+          { icon: 'fa-ferry', title: '3. Staten Island Ferry (Grátis, a cada 30 min)', desc: 'Não precisa comprar bilhete! Siga a placa "Staten Island Ferry". Ao entrar no barco, vá para o LADO DIREITO (starboard) para fotos perfeitas da Estátua da Liberdade. Em Staten Island, desembarque e pegue o próximo barco de volta.' }
+        ]
+      },
+      {
+        id: 'route-brooklyn',
+        title: 'Rota 5: Hotel → Ponte do Brooklyn & DUMBO',
+        badge: 'Metrô + Travessia Icônica',
+        color: '#e11d48',
+        duration: '~15 min metrô + 35 min passeio',
+        cost: '$2.90 metrô (Ponte $0)',
+        center: [40.7250, -73.9980],
+        zoom: 13,
+        walkSegments: [
+          [
+            [40.7155, -74.0092], // Chambers St Subway
+            [40.7124, -74.0041], // Brooklyn Bridge Manhattan Entrance
+            [40.7033, -73.9949]  // DUMBO / Brooklyn Bridge Park
+          ]
+        ],
+        transitSegments: [
+          [
+            [40.7573, -73.9897], // Times Sq
+            [40.7155, -74.0092]  // Chambers St
+          ]
+        ],
+        fallbackCoords: [
+          [40.7586, -73.9896],
+          [40.7155, -74.0092],
+          [40.7124, -74.0041],
+          [40.7033, -73.9949]
+        ],
+        steps: [
+          { icon: 'fa-train-subway', title: '1. Metrô Linha 2 ou 3 (Vermelha - Expresso)', desc: 'Na Times Sq–42 St, pegue o trem expresso Linha 2 ou 3 sentido DOWNTOWN e desça em 3 paradas rápidas na "Chambers St" (~12 min).' },
+          { icon: 'fa-bridge', title: '2. Subida na Ponte do Brooklyn', desc: 'Caminhe 5 min para leste pela Chambers St até o City Hall Park, onde começa a rampa exclusiva de pedestres da Ponte do Brooklyn.' },
+          { icon: 'fa-camera', title: '3. Travessia & DUMBO (30–40 min no seu ritmo)', desc: 'Atravesse no sentido Manhattan → Brooklyn. Ao descer a escada no Brooklyn, siga até a Washington St (foto da Manhattan Bridge) e o Brooklyn Bridge Park. Para voltar, pegue o metrô Linha A ou C na estação High St.' }
+        ]
+      },
+      {
+        id: 'route-summit',
+        title: 'Rota 6: Hotel → Grand Central & SUMMIT (Via Túnel)',
+        badge: '100% Protegido do Frio',
+        color: '#d97706',
+        duration: '~10 min total',
+        cost: '$2.90 metrô (ou $0 a pé)',
+        center: [40.7545, -73.9835],
+        zoom: 15,
+        walkSegments: [
+          [
+            [40.7586, -73.9896], // Hotel
+            [40.7536, -73.9832], // Bryant Park
+            [40.7527, -73.9787], // SUMMIT
+            [40.7527, -73.9772]  // Grand Central
+          ]
+        ],
+        fallbackCoords: [
+          [40.7586, -73.9896],
+          [40.7536, -73.9832],
+          [40.7527, -73.9787],
+          [40.7527, -73.9772]
+        ],
+        steps: [
+          { icon: 'fa-train-subway', title: '1. Shuttle S (42nd St) — 2 minutos!', desc: 'Na Times Sq–42 St, siga as placas cinzas do trem "S" (42 St Shuttle). Ele vai direto até a Grand Central sem paradas intermediárias.' },
+          { icon: 'fa-landmark', title: '2. Grand Central Terminal & Feira de Natal', desc: 'Admire o teto estrelado do Main Concourse e a feira natalina no Vanderbilt Hall.' },
+          { icon: 'fa-building', title: '3. Entrada Interna para o SUMMIT One Vanderbilt', desc: 'Sem precisar sair na rua, siga a sinalização interna "One Vanderbilt / SUMMIT" direto do saguão da Grand Central até a bilheteria e elevadores do observatório.' }
+        ]
       }
     ];
 
     // Layer Groups
     const markersLayer = L.layerGroup().addTo(map);
+    const activeRouteLayer = L.layerGroup().addTo(map);
     const layers = {
       walk: L.layerGroup().addTo(map),
       tunnels: L.layerGroup().addTo(map),
@@ -701,8 +876,35 @@
       ferry: L.layerGroup().addTo(map)
     };
 
-    // 1. Surface Walking Loop in Midtown (Emerald Green)
-    const midtownWalkCoords = [
+    // OSRM Street-Snapping Helper with LocalStorage Cache & Fallback
+    async function fetchOSRMFootGeometry(waypoints, cacheKey) {
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          return JSON.parse(cached);
+        }
+      } catch (e) {}
+
+      try {
+        const coordString = waypoints.map(pt => `${pt[1]},${pt[0]}`).join(';');
+        const url = `https://router.project-osrm.org/route/v1/foot/${coordString}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+          const latlngs = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(latlngs));
+          } catch (e) {}
+          return latlngs;
+        }
+      } catch (err) {
+        console.warn('OSRM fallback used for', cacheKey);
+      }
+      return waypoints;
+    }
+
+    // 1. Midtown Walking Loop (Snapped Corner-by-Corner to Manhattan Streets)
+    const midtownWaypoints = [
       [40.7586, -73.9896], // ROW NYC
       [40.7626, -73.9808], // La Grande Boucherie
       [40.7600, -73.9800], // Radio City
@@ -711,69 +913,372 @@
       [40.7585, -73.9760], // St Patrick's
       [40.7527, -73.9787], // SUMMIT / Grand Central
       [40.7536, -73.9832], // Bryant Park
-      [40.7580, -73.9855], // Times Square
+      [40.7575, -73.9866], // Carmine's 44th St
       [40.7586, -73.9896]  // Back to ROW NYC
     ];
-    L.polyline(midtownWalkCoords, {
-      color: '#10b981',
-      weight: 4,
-      opacity: 0.8,
-      dashArray: '6, 8'
-    }).bindTooltip('Circuito Caminhada Midtown (5 a 15 min entre pontos)', { sticky: true }).addTo(layers.walk);
 
-    // 2. Indoor Underground Tunnels / Concourses (Warm Amber)
+    async function initMidtownWalkLayer() {
+      const snappedCoords = await fetchOSRMFootGeometry(midtownWaypoints, 'osrm_midtown_loop_v3');
+      layers.walk.clearLayers();
+      L.polyline(snappedCoords, {
+        color: '#10b981',
+        weight: 4,
+        opacity: 0.8,
+        dashArray: '6, 8'
+      }).bindTooltip('Circuito Caminhada Midtown (encaixado nas calçadas)', { sticky: true }).addTo(layers.walk);
+    }
+    initMidtownWalkLayer();
+
+    // 2. Indoor Underground Tunnels (Warm Amber)
     const rockConcourse = [
       [40.7606, -73.9803],
       [40.7595, -73.9793],
       [40.7587, -73.9787],
       [40.7576, -73.9812]
     ];
-    L.polyline(rockConcourse, {
-      color: '#f59e0b',
-      weight: 6,
-      opacity: 0.92
-    }).bindTooltip('Túnel Aquecido: Rockefeller Center Concourse (47th–51st St)', { sticky: true }).addTo(layers.tunnels);
+    L.polyline(rockConcourse, { color: '#f59e0b', weight: 6, opacity: 0.9 })
+      .bindTooltip('Túnel Aquecido: Rockefeller Center Concourse (47th–51st St)', { sticky: true }).addTo(layers.tunnels);
 
     const grandCentralTunnel = [
-      [40.7527, -73.9772], // Grand Central
-      [40.7527, -73.9787], // SUMMIT One Vanderbilt
-      [40.7536, -73.9832], // Bryant Park 42nd St
-      [40.7555, -73.9868]  // Times Square 42nd St
+      [40.7527, -73.9772],
+      [40.7527, -73.9787],
+      [40.7536, -73.9832],
+      [40.7555, -73.9868]
     ];
-    L.polyline(grandCentralTunnel, {
-      color: '#f59e0b',
-      weight: 6,
-      opacity: 0.92
-    }).bindTooltip('Passagem Subterrânea: Grand Central ↔ SUMMIT ↔ Bryant Park / Times Sq', { sticky: true }).addTo(layers.tunnels);
+    L.polyline(grandCentralTunnel, { color: '#f59e0b', weight: 6, opacity: 0.9 })
+      .bindTooltip('Passagem Subterrânea: Grand Central ↔ SUMMIT ↔ Bryant Park', { sticky: true }).addTo(layers.tunnels);
 
     // 3. Subway Route South (Red Line 1)
     const subwaySouthCoords = [
-      [40.7586, -73.9896], // Times Sq / 42nd St
-      [40.7505, -73.9910], // Penn Station
-      [40.7359, -74.0003], // 14th St
-      [40.7155, -74.0092], // Chambers St
-      [40.7013, -74.0131]  // South Ferry
+      [40.7586, -73.9896],
+      [40.7505, -73.9910],
+      [40.7359, -74.0003],
+      [40.7155, -74.0092],
+      [40.7013, -74.0131]
     ];
-    L.polyline(subwaySouthCoords, {
-      color: '#e11d48',
-      weight: 4,
-      opacity: 0.85
-    }).bindTooltip('Metrô Linha 1 (Vermelha): Times Square → Brooklyn Bridge / South Ferry (~18 min, $2.90)', { sticky: true }).addTo(layers.subway);
+    L.polyline(subwaySouthCoords, { color: '#e11d48', weight: 4, opacity: 0.85 })
+      .bindTooltip('Metrô Linha 1: Times Sq → Brooklyn Bridge / South Ferry (~18 min, $2.90)', { sticky: true }).addTo(layers.subway);
 
-    // 4. Staten Island Ferry Free Route past Statue of Liberty (Sky Blue Dotted)
+    // 4. Staten Island Ferry Route
     const ferryRouteCoords = [
-      [40.7013, -74.0131], // Whitehall Terminal
-      [40.6920, -74.0310], // Passing right by Statue of Liberty
-      [40.6780, -74.0520], // Harbor channel
-      [40.6437, -74.0736]  // St. George Terminal
+      [40.7013, -74.0131],
+      [40.6920, -74.0310],
+      [40.6780, -74.0520],
+      [40.6437, -74.0736]
     ];
-    L.polyline(ferryRouteCoords, {
-      color: '#0284c7',
-      weight: 4,
-      opacity: 0.9,
-      dashArray: '8, 8'
-    }).bindTooltip('Rota Gratuita Staten Island Ferry (passa em frente à Estátua da Liberdade!)', { sticky: true }).addTo(layers.ferry);
+    L.polyline(ferryRouteCoords, { color: '#0284c7', weight: 4, opacity: 0.9, dashArray: '8, 8' })
+      .bindTooltip('Staten Island Ferry Grátis (passa em frente à Estátua da Liberdade!)', { sticky: true }).addTo(layers.ferry);
 
+    // GPS User Location State
+    let userCoords = null;
+    let userMarker = null;
+
+    function locateUser(callbackAfterLocate = null) {
+      const btn = document.getElementById('btn-gps');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Buscando...';
+
+      if (!navigator.geolocation) {
+        alert('Seu navegador não suporta geolocalização.');
+        btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Onde estou';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          userCoords = [pos.coords.latitude, pos.coords.longitude];
+          btn.innerHTML = '<i class="fa-solid fa-location-dot"></i> GPS Ativo';
+          btn.classList.remove('bg-blue-600');
+          btn.classList.add('bg-emerald-600');
+
+          if (userMarker) map.removeLayer(userMarker);
+          const gpsIcon = L.divIcon({
+            className: '',
+            html: '<div class="user-gps-dot"></div>',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
+          });
+          userMarker = L.marker(userCoords, { icon: gpsIcon })
+            .bindPopup('<div class="p-3 text-xs font-bold text-slate-800">📍 Você está aqui agora!</div>')
+            .addTo(map);
+
+          if (callbackAfterLocate) {
+            callbackAfterLocate(userCoords);
+          } else {
+            map.flyTo(userCoords, 16, { duration: 1 });
+            if (window.innerWidth < 768) setDrawerState('collapsed');
+          }
+        },
+        (err) => {
+          btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Onde estou';
+          alert('Não foi possível obter sua localização agora. Verifique se a localização do Safari/Chrome está ativada.');
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+
+    // Real-Time Pedestrian Routing via OSRM
+    function routeFromCurrentLocation(destId) {
+      const dest = locations.find(l => l.id === destId);
+      if (!dest) return;
+
+      const executeOSRM = async (startCoords, isSimulated = false) => {
+        showRouteBanner(`Rota a pé → ${dest.name}`, 'Traçando pelas esquinas via OSRM...', '#2563eb', 'fa-person-walking');
+        if (window.innerWidth < 768) setDrawerState('collapsed');
+
+        try {
+          const url = `https://router.project-osrm.org/route/v1/foot/${startCoords[1]},${startCoords[0]};${dest.coords[1]},${dest.coords[0]}?overview=full&geometries=geojson`;
+          const res = await fetch(url);
+          const data = await res.json();
+
+          if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+            throw new Error('Rota não encontrada');
+          }
+
+          const route = data.routes[0];
+          const latlngs = route.geometry.coordinates.map(c => [c[1], c[0]]);
+          const distMeters = Math.round(route.distance);
+          const distText = distMeters >= 1000 ? `${(distMeters / 1000).toFixed(1)} km` : `${distMeters} m`;
+          const walkMins = Math.max(1, Math.round(distMeters / 75));
+
+          activeRouteLayer.clearLayers();
+          const poly = L.polyline(latlngs, {
+            color: '#2563eb',
+            weight: 6,
+            opacity: 0.92
+          }).addTo(activeRouteLayer);
+
+          L.circleMarker(startCoords, {
+            radius: 7,
+            color: '#ffffff',
+            weight: 2,
+            fillColor: '#2563eb',
+            fillOpacity: 1
+          }).bindTooltip(isSimulated ? 'Início Simulado: ROW NYC Hotel' : 'Sua Posição Atual').addTo(activeRouteLayer);
+
+          map.fitBounds(poly.getBounds(), { padding: [55, 55] });
+          const prefix = isSimulated ? '[Simulação Hotel] ' : '';
+          showRouteBanner(`A pé → ${dest.name}`, `${prefix}${distText} • ~${walkMins} min caminhando`, '#2563eb', 'fa-person-walking');
+        } catch (e) {
+          showRouteBanner(`A pé → ${dest.name}`, 'Erro ao calcular rota. Tente abrir no Apple Maps.', '#e11d48', 'fa-triangle-exclamation');
+        }
+      };
+
+      if (userCoords) {
+        const distFromNYC = Math.abs(userCoords[0] - 40.758) + Math.abs(userCoords[1] - (-73.985));
+        if (distFromNYC > 1.5) {
+          showSimulatedHotelOption(dest);
+          return;
+        }
+        executeOSRM(userCoords, false);
+      } else {
+        locateUser((coords) => {
+          const distFromNYC = Math.abs(coords[0] - 40.758) + Math.abs(coords[1] - (-73.985));
+          if (distFromNYC > 1.5) {
+            showSimulatedHotelOption(dest);
+          } else {
+            executeOSRM(coords, false);
+          }
+        });
+      }
+    }
+
+    function showSimulatedHotelOption(dest) {
+      const hotelCoords = [40.7586, -73.9896];
+      activeRouteLayer.clearLayers();
+      showRouteBanner(
+        `Você está fora de NY agora!`,
+        `Simulando saída do ROW NYC Hotel → ${dest.name}`,
+        '#059669',
+        'fa-wand-magic-sparkles'
+      );
+      if (window.innerWidth < 768) setDrawerState('collapsed');
+
+      fetch(`https://router.project-osrm.org/route/v1/foot/${hotelCoords[1]},${hotelCoords[0]};${dest.coords[1]},${dest.coords[0]}?overview=full&geometries=geojson`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.code === 'Ok' && data.routes.length > 0) {
+            const route = data.routes[0];
+            const latlngs = route.geometry.coordinates.map(c => [c[1], c[0]]);
+            const distMeters = Math.round(route.distance);
+            const distText = distMeters >= 1000 ? `${(distMeters / 1000).toFixed(1)} km` : `${distMeters} m`;
+            const walkMins = Math.max(1, Math.round(distMeters / 75));
+
+            const poly = L.polyline(latlngs, {
+              color: '#059669',
+              weight: 6,
+              opacity: 0.92
+            }).addTo(activeRouteLayer);
+
+            map.fitBounds(poly.getBounds(), { padding: [55, 55] });
+            showRouteBanner(
+              `[Teste Hotel] → ${dest.name}`,
+              `${distText} • ~${walkMins} min a pé pelas calçadas`,
+              '#059669',
+              'fa-person-walking'
+            );
+          }
+        });
+    }
+
+    // Draw One of the Preset Step-by-Step Routes (With Street-Snapped Walking Segments!)
+    async function drawPresetRoute(routeId) {
+      const r = presetRoutes.find(item => item.id === routeId);
+      if (!r) return;
+
+      activeRouteLayer.clearLayers();
+      showRouteBanner(r.title, 'Encaixando ruas no mapa...', r.color, 'fa-route');
+      if (window.innerWidth < 768) setDrawerState('collapsed');
+
+      const boundsPoints = [];
+
+      // 1. Draw Street-Snapped Walking Segments via OSRM
+      if (r.walkSegments && r.walkSegments.length > 0) {
+        for (let i = 0; i < r.walkSegments.length; i++) {
+          const seg = r.walkSegments[i];
+          const snapped = await fetchOSRMFootGeometry(seg, `osrm_preset_${r.id}_walk_${i}_v3`);
+          L.polyline(snapped, {
+            color: r.color,
+            weight: 6,
+            opacity: 0.95
+          }).addTo(activeRouteLayer);
+          snapped.forEach(pt => boundsPoints.push(pt));
+        }
+      }
+
+      // 2. Draw Transit/Subway/Ferry Segments (Dashed)
+      if (r.transitSegments && r.transitSegments.length > 0) {
+        r.transitSegments.forEach(tSeg => {
+          L.polyline(tSeg, {
+            color: r.color,
+            weight: 5,
+            opacity: 0.85,
+            dashArray: '8, 8'
+          }).addTo(activeRouteLayer);
+          tSeg.forEach(pt => boundsPoints.push(pt));
+        });
+      }
+
+      // Fallback if no segments defined
+      if (boundsPoints.length === 0 && r.fallbackCoords) {
+        L.polyline(r.fallbackCoords, {
+          color: r.color,
+          weight: 6,
+          opacity: 0.95
+        }).addTo(activeRouteLayer);
+        r.fallbackCoords.forEach(pt => boundsPoints.push(pt));
+      }
+
+      // Start & End markers
+      const firstPt = boundsPoints[0];
+      const lastPt = boundsPoints[boundsPoints.length - 1];
+
+      L.circleMarker(firstPt, {
+        radius: 8,
+        color: '#ffffff',
+        weight: 2.5,
+        fillColor: '#0f172a',
+        fillOpacity: 1
+      }).bindTooltip('Início da Rota').addTo(activeRouteLayer);
+
+      L.circleMarker(lastPt, {
+        radius: 9,
+        color: '#ffffff',
+        weight: 2.5,
+        fillColor: r.color,
+        fillOpacity: 1
+      }).bindTooltip('Destino Final').addTo(activeRouteLayer);
+
+      const polyBounds = L.latLngBounds(boundsPoints);
+      map.fitBounds(polyBounds, { padding: [55, 55] });
+      showRouteBanner(r.title, `${r.duration} • ${r.cost}`, r.color, 'fa-route');
+    }
+
+    function showRouteBanner(title, stats, color, iconClass) {
+      const banner = document.getElementById('active-route-banner');
+      document.getElementById('active-route-title').textContent = title;
+      document.getElementById('active-route-stats').textContent = stats;
+      document.getElementById('banner-icon-box').style.backgroundColor = color;
+      document.getElementById('banner-icon').className = `fa-solid ${iconClass} text-xs text-white`;
+      banner.classList.remove('hidden');
+    }
+
+    function clearActiveRoute() {
+      activeRouteLayer.clearLayers();
+      document.getElementById('active-route-banner').classList.add('hidden');
+    }
+
+    // Main Tabs Switcher: Places vs Preset Routes
+    let currentMainTab = 'places';
+    function switchMainTab(tab) {
+      currentMainTab = tab;
+      const tabPlaces = document.getElementById('tab-places');
+      const tabRoutes = document.getElementById('tab-routes');
+      const filterBar = document.getElementById('places-filter-bar');
+
+      if (tab === 'places') {
+        tabPlaces.className = 'py-1.5 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5';
+        tabRoutes.className = 'py-1.5 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5';
+        filterBar.classList.remove('hidden');
+        renderMarkersAndList('all');
+      } else {
+        tabRoutes.className = 'py-1.5 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5';
+        tabPlaces.className = 'py-1.5 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5';
+        filterBar.classList.add('hidden');
+        renderPresetRoutesList();
+      }
+    }
+
+    // Render Preset Step-by-Step Routes List
+    function renderPresetRoutesList() {
+      const listEl = document.getElementById('locations-list');
+      listEl.innerHTML = `
+        <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 mb-1">
+          <p class="font-bold"><i class="fa-solid fa-train-subway mr-1 text-amber-600"></i> Dica de Ouro do Metrô de NY:</p>
+          <p class="text-[11px] mt-0.5">Não precisa comprar bilhete! Encoste seu <strong>iPhone (Apple Pay)</strong> ou cartão por aproximação direto na catraca (<strong>$2.90</strong>). No Natal os trens passam a cada 5–10 min.</p>
+        </div>
+      `;
+
+      presetRoutes.forEach(route => {
+        const stepsHTML = route.steps.map(st => `
+          <div class="flex items-start gap-2.5 pt-2 border-t border-slate-100">
+            <div style="color: ${route.color};" class="w-5 text-center mt-0.5 shrink-0">
+              <i class="fa-solid ${st.icon} text-xs"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold text-slate-800">${st.title}</p>
+              <p class="text-[11px] text-slate-600 leading-relaxed mt-0.5">${st.desc}</p>
+            </div>
+          </div>
+        `).join('');
+
+        const card = document.createElement('div');
+        card.className = 'p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2.5';
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span style="background-color: ${route.color};" class="inline-block px-2 py-0.5 rounded-full text-white text-[10px] font-bold uppercase tracking-wider">
+                ${route.badge}
+              </span>
+              <h3 class="font-bold text-sm text-slate-900 mt-1">${route.title}</h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">
+                <i class="fa-regular fa-clock mr-1"></i>${route.duration} • <strong class="text-emerald-700">${route.cost}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            ${stepsHTML}
+          </div>
+
+          <button onclick="drawPresetRoute('${route.id}')" style="background-color: ${route.color};" class="w-full py-2.5 px-3 rounded-xl text-white text-xs font-bold shadow hover:opacity-95 active:scale-98 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-map-location-dot"></i> Desenhar Esta Rota nas Ruas do Mapa
+          </button>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    // Render Places Markers & List
     const markerRefs = {};
 
     function renderMarkersAndList(filter = 'all') {
@@ -783,22 +1288,22 @@
 
       const filtered = filter === 'all' ? locations : locations.filter(loc => loc.category === filter);
 
-      filtered.forEach((loc) => {
+      filtered.forEach(loc => {
         const customIcon = L.divIcon({
           className: '',
-          html: `<div class="custom-pin" style="background-color: ${loc.color}; width: 36px; height: 36px;">
+          html: `<div class="custom-pin" style="background-color: ${loc.color}; width: 34px; height: 34px;">
                   <i class="fa-solid ${loc.icon} text-xs"></i>
                  </div>`,
-          iconSize: [36, 36],
-          iconAnchor: [18, 18],
-          popupAnchor: [0, -18]
+          iconSize: [34, 34],
+          iconAnchor: [17, 17],
+          popupAnchor: [0, -16]
         });
 
         const appleMapsUrl = `https://maps.apple.com/?daddr=${loc.coords[0]},${loc.coords[1]}&dirflg=w`;
 
         const popupHTML = `
           <div>
-            <div style="background-color: ${loc.color};" class="p-3 text-white pr-8">
+            <div style="background-color: ${loc.color};" class="p-3 text-white">
               <span class="inline-block px-2 py-0.5 rounded-full bg-black/25 text-[10px] font-bold uppercase tracking-wider mb-1">
                 ${loc.badge}
               </span>
@@ -806,12 +1311,12 @@
               <p class="text-[11px] opacity-90 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${loc.address}</p>
             </div>
             <div class="p-3 bg-white text-xs space-y-2 text-slate-700">
-              <div class="flex items-center justify-between border-b border-slate-100 pb-1.5 gap-2">
-                <span class="text-slate-500 shrink-0"><i class="fa-solid fa-person-walking mr-1 text-emerald-600"></i>Distância:</span>
+              <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                <span class="text-slate-500"><i class="fa-solid fa-person-walking mr-1 text-emerald-600"></i>Distância:</span>
                 <span class="font-semibold text-slate-800 text-right">${loc.distance}</span>
               </div>
-              <div class="flex items-center justify-between border-b border-slate-100 pb-1.5 gap-2">
-                <span class="text-slate-500 shrink-0"><i class="fa-solid fa-tag mr-1 text-amber-600"></i>Custo:</span>
+              <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                <span class="text-slate-500"><i class="fa-solid fa-tag mr-1 text-amber-600"></i>Custo:</span>
                 <span class="font-semibold text-emerald-700 text-right">${loc.cost}</span>
               </div>
               <div>
@@ -819,40 +1324,41 @@
                 <p class="text-slate-600 leading-relaxed">${loc.transport}</p>
               </div>
               <div class="p-2 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-950">
-                <p class="font-semibold text-[11px]"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>Dica Especial:</p>
+                <p class="font-semibold text-[11px]"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>Dica:</p>
                 <p class="text-[11px] leading-relaxed mt-0.5">${loc.tip}</p>
               </div>
-              <a href="${appleMapsUrl}" target="_blank" rel="noopener" class="mt-1 w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-[11px] flex items-center justify-center gap-1.5 transition">
-                <i class="fa-brands fa-apple text-sm"></i> Abrir Rota no Apple Maps
-              </a>
+              <div class="grid grid-cols-2 gap-1.5 pt-1">
+                <button onclick="routeFromCurrentLocation('${loc.id}')" class="py-2 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow">
+                  <i class="fa-solid fa-person-walking"></i> Rota a Pé Daqui
+                </button>
+                <a href="${appleMapsUrl}" target="_blank" rel="noopener" class="py-2 px-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow">
+                  <i class="fa-brands fa-apple"></i> Apple Maps
+                </a>
+              </div>
             </div>
           </div>
         `;
 
         const marker = L.marker(loc.coords, { icon: customIcon })
-          .bindPopup(popupHTML, { maxWidth: 310, autoPanPaddingTopLeft: [15, 95], autoPanPaddingBottomRight: [15, 130] })
+          .bindPopup(popupHTML, { maxWidth: 310 })
           .addTo(markersLayer);
 
         markerRefs[loc.id] = marker;
 
-        // Sidebar / Bottom Sheet Card
+        // Sidebar Card
         const card = document.createElement('div');
-        card.className = 'p-3 rounded-2xl bg-white border border-slate-200 hover:border-slate-400 active:bg-slate-50 hover:shadow-md transition cursor-pointer group';
+        card.className = 'p-3 rounded-2xl bg-white border border-slate-200 hover:border-slate-400 active:bg-slate-50 shadow-sm transition cursor-pointer';
         card.onclick = () => {
-          // On iPhone/Mobile, collapse sheet to 'min' so user sees the full map + popup clearly!
-          if (window.innerWidth < 768) {
-            setSheetState('min');
+          if (window.innerWidth < 768 && drawerState !== 'collapsed') {
+            setDrawerState('collapsed');
           }
-          setTimeout(() => {
-            map.invalidateSize();
-            map.flyTo(loc.coords, 16, { duration: 0.85 });
-            setTimeout(() => marker.openPopup(), 450);
-          }, 180);
+          map.flyTo(loc.coords, 16, { duration: 0.85 });
+          setTimeout(() => marker.openPopup(), 420);
         };
 
         card.innerHTML = `
           <div class="flex items-start gap-3">
-            <div style="background-color: ${loc.color};" class="w-10 h-10 rounded-xl text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm group-hover:scale-105 transition">
+            <div style="background-color: ${loc.color};" class="w-9 h-9 rounded-xl text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
               <i class="fa-solid ${loc.icon} text-sm"></i>
             </div>
             <div class="flex-1 min-w-0">
@@ -862,9 +1368,15 @@
                 </span>
                 <span class="text-[11px] font-semibold text-emerald-700 truncate">${loc.cost}</span>
               </div>
-              <h4 class="font-bold text-sm text-slate-900 mt-1 group-hover:text-emerald-700 transition">${loc.name}</h4>
+              <h4 class="font-bold text-sm text-slate-900 mt-1">${loc.name}</h4>
               <p class="text-xs text-slate-500 mt-0.5 truncate"><i class="fa-solid fa-shoe-prints mr-1 text-slate-400"></i>${loc.distance}</p>
               <p class="text-xs text-slate-600 mt-1.5 line-clamp-2 leading-relaxed">${loc.tip}</p>
+              <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                <button onclick="event.stopPropagation(); routeFromCurrentLocation('${loc.id}')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] flex items-center gap-1 transition">
+                  <i class="fa-solid fa-person-walking"></i> Rota a pé daqui (GPS)
+                </button>
+                <span class="text-[11px] font-semibold text-slate-400">Ver no mapa →</span>
+              </div>
             </div>
           </div>
         `;
@@ -872,36 +1384,7 @@
       });
     }
 
-    // Mobile 3-State Bottom Sheet Controller
-    let currentSheetState = 'mid';
-
-    function setSheetState(state) {
-      const drawer = document.getElementById('sidebar-drawer');
-      drawer.classList.remove('sheet-min', 'sheet-mid', 'sheet-max');
-      drawer.classList.add(`sheet-${state}`);
-      currentSheetState = state;
-
-      ['min', 'mid', 'max'].forEach(s => {
-        const btn = document.getElementById(`btn-sheet-${s}`);
-        if (btn) {
-          if (s === state) {
-            btn.className = 'px-2 py-1 rounded-lg bg-slate-900 text-white';
-          } else {
-            btn.className = 'px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200';
-          }
-        }
-      });
-
-      setTimeout(() => map.invalidateSize(), 340);
-    }
-
-    function cycleSheetState() {
-      if (currentSheetState === 'min') setSheetState('mid');
-      else if (currentSheetState === 'mid') setSheetState('max');
-      else setSheetState('min');
-    }
-
-    // Filter Category Buttons
+    // Category Filter
     function filterCategory(cat) {
       document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.classList.remove('bg-slate-900', 'text-white');
@@ -914,9 +1397,9 @@
       renderMarkersAndList(cat);
 
       if (cat === 'downtown') {
-        map.flyTo([40.6980, -74.0150], 13, { duration: 1 });
+        map.flyTo([40.6980, -74.0150], 13, { duration: 0.9 });
       } else if (cat === 'park') {
-        map.flyTo([40.7630, -73.9765], 14, { duration: 1 });
+        map.flyTo([40.7630, -73.9765], 14, { duration: 0.9 });
       } else if (cat === 'all') {
         focusAllNYC();
       } else {
@@ -924,25 +1407,22 @@
       }
     }
 
-    // Toggle Transit Layers
+    // Layer Toggles
     function toggleLayer(key) {
       const checkbox = document.getElementById(`toggle-${key}`);
-      if (checkbox.checked) {
-        map.addLayer(layers[key]);
-      } else {
-        map.removeLayer(layers[key]);
-      }
+      if (checkbox.checked) map.addLayer(layers[key]);
+      else map.removeLayer(layers[key]);
     }
 
     // Camera Presets
     function focusMidtown() {
-      if (window.innerWidth < 768 && currentSheetState === 'max') setSheetState('mid');
       map.flyTo([40.7585, -73.9815], 15, { duration: 0.9 });
+      if (window.innerWidth < 768 && drawerState === 'expanded') setDrawerState('half');
     }
 
     function focusAllNYC() {
-      if (window.innerWidth < 768 && currentSheetState === 'max') setSheetState('mid');
       map.flyTo([40.7280, -73.9980], 12, { duration: 0.9 });
+      if (window.innerWidth < 768 && drawerState === 'expanded') setDrawerState('half');
     }
 
     // Modal Toggle
@@ -960,12 +1440,8 @@
     // Initial Render
     window.onload = function() {
       renderMarkersAndList('all');
-      setTimeout(() => map.invalidateSize(), 200);
+      setTimeout(() => map.invalidateSize(), 250);
     };
-
-    window.addEventListener('resize', () => {
-      map.invalidateSize();
-    });
   </script>
 </body>
 </html>
